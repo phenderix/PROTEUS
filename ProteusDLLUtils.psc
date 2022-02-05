@@ -1,9 +1,5 @@
 ScriptName ProteusDLLUtils
 
-; @brief Returns the amount of Standing Stone Perks.
-; @return Returns 0 if there is an error.
-int Function GetStandingStonePerkCount(Actor a_reference) Global Native
-
 ; @brief Returns the current Standing Stone Perk.
 ; @return Returns 0 if there is an error or if the player doesnt have one.
 Perk Function GetCurrentStandingStonePerk(Actor actor) global native
