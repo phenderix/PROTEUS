@@ -8,6 +8,10 @@ Perk Function GetCurrentStandingStonePerk(Actor actor) global native
 ; @return Returns 0 if there is an error.
 Perk[] Function GetAllPerks(Actor actor) global native
 
+; @brief Removes all of the actors perks
+; @return Returns 0 if there is an error.
+int Function RemoveAllPerks(Actor a_reference) Global Native
+
 ; @brief Returns an array of all visible perks.
 ; @return Returns 0 if there is an error.
 Perk[] Function GetAllVisiblePerks(Actor actor) global native
