@@ -16,6 +16,22 @@ Perk[] Function GetAllVisiblePerks(Actor actor) global native
 ; @return Returns 0 if there is an error.
 int Function RemoveAllVisiblePerks(Actor a_reference) Global Native
 
+; @brief Returns an array of perks for the skill
+; @return Returns 0 if there is an error.
+Perk[] Function GetPerksForPerkTree(Actor actor, String skill, bool purchasedPerksOnly) global native
+
+; @brief Returns an array of perks for all perk trees
+; @return Returns 0 if there is an error.
+Perk[] Function GetAllPerkTreePerks(Actor actor, bool purchasedPerksOnly) global native
+
+; @brief Removes all of the perks for a specific tree
+; @return Returns 0 if there is an error.
+int Function RemovePerksForTree(Actor a_reference, String skill) Global Native
+
+; @brief Removes all of the skill tree perks
+; @return Returns 0 if there is an error.
+int Function RemovePerksForAllTrees(Actor a_reference) Global Native
+
 ; @brief Returns an array of all spells known by the user.
 ; @return Returns 0 if there is an error.
 Spell[] Function GetAllSpells(Actor actor) global native
