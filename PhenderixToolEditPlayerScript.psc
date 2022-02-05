@@ -2932,24 +2932,17 @@ endFunction
 
 
 function Proteus_SavePerks(String preset)
-	;initial setup
 	Perk[] knownPerks = ProteusDLLUtils.GetAllPerks(player)
 	Perk[] visiblePerks = ProteusDLLUtils.GetAllVisiblePerks(player) 
 	;Debug.Notification("Number of Perks: " + allgamePerks.Length)
 	Proteus_ExportJSONPerk(preset, visiblePerks, visiblePerks.Length, "/Proteus/Proteus_Character_VisiblePerks_", 0, 1)
-
 	Proteus_ExportJSONPerk(preset, knownPerks, knownPerks.Length, "/Proteus/Proteus_Character_Perks_", 0, 1)
 EndFunction
 
 
 function Proteus_RemovePerks(Actor target, int option) ;option 0 = switch characters, option 1 = reset character
 	if option == 0
-		Perk[] knownPerks = ProteusDLLUtils.GetAllPerks(target)
-		int g = 0
-		while g < knownPerks.Length
-			target.RemovePerk(knownPerks[g] as Perk)
-			g+=1
-		endWhile
+		RemoveAllPerks(target)
 	elseif option == 1
 		Proteus_RemovePerks_SlowCheckingProcess(target, 1)
 	endIf
@@ -2961,161 +2954,10 @@ function Proteus_RemovePerks_SlowCheckingProcess(Actor target, int option)
 	;initial setup
 	int perkCountTracker = 0
 	Form[] allGamePerks = Utility.CreateFormArray(5000)
-	;Form[] tempArray = Utility.CreateFormArray(5000)
-	
-	Perk[] tempArray = new Perk[128]
 	int i
-	;Alchemy
-	tempArray = ActorValueInfo.GetActorValueInfoByName("Alchemy").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
 
-	;Alteration
-	tempArray = ActorValueInfo.GetActorValueInfoByName("Alteration").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	;Block
-	tempArray = ActorValueInfo.GetActorValueInfoByName("Block").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	;Conjuration
-	tempArray = ActorValueInfo.GetActorValueInfoByName("Conjuration").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	;Destruction
-	tempArray = ActorValueInfo.GetActorValueInfoByName("Destruction").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	;Enchanting
-	tempArray = ActorValueInfo.GetActorValueInfoByName("Enchanting").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
+	RemovePerksForAllTrees(target)
 	
-	;Illusion
-	if(vokriinatorActive == false)
-		tempArray = ActorValueInfo.GetActorValueInfoByName("Illusion").GetPerks(player, 0, 1)
-		i = 0
-		while i < tempArray.length && tempArray[i] != NONE
-			allGamePerks[perkCountTracker] = tempArray[i]
-			perkCountTracker+=1
-			i+=1    
-		endwhile
-	endIf
-	;LightArmor
-	tempArray = ActorValueInfo.GetActorValueInfoByName("LightArmor").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	;Lockpicking
-	tempArray = ActorValueInfo.GetActorValueInfoByName("Lockpicking").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	
-	;HeavyArmor
-	tempArray = ActorValueInfo.GetActorValueInfoByName("HeavyArmor").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	;Marksman
-	tempArray = ActorValueInfo.GetActorValueInfoByName("Marksman").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	;OneHanded
-	tempArray = ActorValueInfo.GetActorValueInfoByName("OneHanded").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	;Pickpocket
-	tempArray = ActorValueInfo.GetActorValueInfoByName("Pickpocket").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	
-	;Restoration
-	tempArray = ActorValueInfo.GetActorValueInfoByName("Restoration").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	;Smithing
-	tempArray = ActorValueInfo.GetActorValueInfoByName("Smithing").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	;Sneak
-	tempArray = ActorValueInfo.GetActorValueInfoByName("Sneak").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	;Speechcraft
-	tempArray = ActorValueInfo.GetActorValueInfoByName("Speechcraft").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	
-	;TwoHanded
-	tempArray = ActorValueInfo.GetActorValueInfoByName("TwoHanded").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
 	;add all vanilla vampire and werewolf perks to JMap
 	i = 0
 	while i < ZZVanillaPerksListVampireWerewolf.GetSize() && ZZVanillaPerksListVampireWerewolf != NONE
