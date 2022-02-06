@@ -1097,7 +1097,7 @@ function Proteus_CharacterSave(Actor target, String presetNameKnown)
 		;save appearance of target's character (including race) and make system register preset
 		Proteus_SaveCharacterAppearance(presetName, target) 
 		String processedPLAYERPRESETName = processName(presetName)
-		Proteus_RegisterLoadedPresetOption(target, processedPLAYERPRESETName, presetName)
+		Proteus_RegisterLoadedPresetOption(target, processedPLAYERPRESETName, presetName, false)
 		SaveAppearancePresetJSON(processedPLAYERPRESETName, presetName)
 		SavePresetGlobalVariables(presetName)
 		Debug.Notification(characterSavingName + " appearance saved successfully.")
@@ -1232,7 +1232,7 @@ function Proteus_LoadCharacter(Actor target, String presetKnownName)
 				;make system recognize this appearance preset has been loaded
 				Proteus_SavePlayerPreset(target, presetName)
 				String processedPLAYERPRESETName = processName(presetName)
-				Proteus_RegisterLoadedPresetOption(target, processedPLAYERPRESETName, presetName)
+				Proteus_RegisterLoadedPresetOption(target, processedPLAYERPRESETName, presetName, false)
 				SaveAppearancePresetJSON(target.GetActorBase().GetName(), presetName)
 				LoadPresetGlobalVariables(presetName)
 
@@ -1302,7 +1302,7 @@ function Proteus_LoadCharacterSpawn(Actor target, String presetKnownName)
 						Proteus_LoadSkillsAttributes(presetName, target, 1) ;REENABLE
 						Proteus_LoadCharacterAppearance(presetName, target, currentRace, presetRace, 1) ;load appearance of spawned NPC
 						
-						Proteus_RegisterLoadedPresetOption(target, presetName, presetName)
+						Proteus_RegisterLoadedPresetOption(target, presetName, presetName, true)
 
 						;remove existing spells and perks from the spawn
 						Proteus_RemoveSpells(target, 0) 
@@ -4973,7 +4973,7 @@ endFunction
 
 
 
-function Proteus_RegisterLoadedPresetOption(Actor targetName, String processedPLAYERPRESETName, String presetName)
+function Proteus_RegisterLoadedPresetOption(Actor targetName, String processedPLAYERPRESETName, String presetName, bool isSpawn)
 	playerPresetFirstLoad = false
     Int jPLAYERPRESETFormList
     if(fileExistsAtPath(JContGlobalPath + "/Proteus/Proteus_Character_PresetsLoaded_" + Proteus_Round(ZZNPCAppearanceSaved.GetValue(),0) + ".json"))
@@ -4989,7 +4989,9 @@ function Proteus_RegisterLoadedPresetOption(Actor targetName, String processedPL
         if value == processedPLAYERPRESETName
             insertNewPLAYERPRESET = false
             jmap.SetStr(jNFormNames, i + "_ProteusPlayerPreset_" + processedPLAYERPRESETName, value)
-			ZZPresetLoadedCounter.SetValue(i)
+			if(!isSpawn)
+				ZZPresetLoadedCounter.SetValue(i)
+			endif
         else
             jmap.SetStr(jNFormNames, PLAYERPRESETFormKey, value)
         endIf
@@ -4998,7 +5000,9 @@ function Proteus_RegisterLoadedPresetOption(Actor targetName, String processedPL
     endWhile
     if insertNewPLAYERPRESET == true
         jmap.SetStr(jNFormNames, i + "_ProteusPlayerPreset_" + processedPLAYERPRESETName, presetName)
-		ZZPresetLoadedCounter.SetValue(i)
+		if(!isSpawn)
+			ZZPresetLoadedCounter.SetValue(i)
+		endif
 		playerPresetFirstLoad = true
     endIf
     jvalue.writeToFile(jNFormNames, JContGlobalPath + "/Proteus/Proteus_Character_PresetsLoaded_" + Proteus_Round(ZZNPCAppearanceSaved.GetValue(),0) + ".json")
