@@ -6577,7 +6577,11 @@ Function Proteus_CheatItem(int startingPoint, int currentPage, int typeCode) ;op
         listMenuBase.AddEntryItem("[Search " + typeString + "]")
         i+=1
         while startingPoint <= allGameItems.Length && i < 128
-            listMenuBase.AddEntryItem(GetFormEditorID(allGameItems[startingPoint]))
+			String name = GetFormEditorID(allGameItems[startingPoint])
+			if(name == "")
+				name = allGameItems[startingPoint].GetName()
+			endif
+            listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
             if(i == 127)
@@ -6667,7 +6671,11 @@ Function Proteus_CheatItemSearch(Form[] foundItems, int startingPoint, int curre
         listMenuBase.AddEntryItem("[Search " + typeString + "]")
         i+=1
         while startingPoint <= allGameItems.Length && i < 128
-            listMenuBase.AddEntryItem(GetFormEditorID(allGameItems[startingPoint]))
+			String name = GetFormEditorID(allGameItems[startingPoint])
+			if(name == "")
+				name = allGameItems[startingPoint].GetName()
+			endif
+            listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
             if(i == 127)
@@ -6748,7 +6756,11 @@ Function Proteus_CheatSpell(int startingPoint, int currentPage, int typeCode) ;o
         listMenuBase.AddEntryItem("[Search Spells]")
         i+=1
         while startingPoint <= allGameSpells.Length && i < 128
-            listMenuBase.AddEntryItem(GetFormEditorID(allGameSpells[startingPoint]))
+			String name = GetFormEditorID(allGameSpells[startingPoint])
+			if(name == "")
+				name = allGameSpells[startingPoint].GetName()
+			endif
+            listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
             if(i == 127)
@@ -6801,7 +6813,11 @@ Function Proteus_CheatSpellSearch(Form[] foundSpells, int startingPoint, int cur
         listMenuBase.AddEntryItem("[Search Spells]")
         i+=1
         while startingPoint <= allGameSpells.Length && i < 128
-            listMenuBase.AddEntryItem(GetFormEditorID(allGameSpells[startingPoint]))
+			String name = GetFormEditorID(allGameSpells[startingPoint])
+			if(name == "")
+				name = allGameSpells[startingPoint].GetName()
+			endif
+            listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
             if(i == 127)
@@ -6856,7 +6872,11 @@ Function Proteus_CheatPerk(int startingPoint, int currentPage, int typeCode) ;op
         listMenuBase.AddEntryItem("[Search Perks]")
         i+=1
         while startingPoint <= allGamePerks.Length && i < 128
-            listMenuBase.AddEntryItem(GetFormEditorID(allGamePerks[startingPoint]))
+			String name = GetFormEditorID(allGamePerks[startingPoint])
+			if(name == "")
+				name = allGamePerks[startingPoint].GetName()
+			endif
+            listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
             if(i == 127)
@@ -6911,7 +6931,11 @@ Function Proteus_CheatPerkSearch(Form[] foundPerks, int startingPoint, int curre
         listMenuBase.AddEntryItem("[Search Perks]")
         i+=1
         while startingPoint <= allGamePerks.Length && i < 128
-            listMenuBase.AddEntryItem(GetFormEditorID(allGamePerks[startingPoint]))
+			String name = GetFormEditorID(allGamePerks[startingPoint])
+			if(name == "")
+				name = allGamePerks[startingPoint].GetName()
+			endif
+            listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
             if(i == 127)
@@ -6968,7 +6992,11 @@ Function Proteus_CheatShout(int startingPoint, int currentPage, int typeCode) ;o
         listMenuBase.AddEntryItem("[Search Shouts]")
         i+=1
         while startingPoint <= allGameShouts.Length && i < 128
-            listMenuBase.AddEntryItem(GetFormEditorID(allGameShouts[startingPoint]))
+			String name = GetFormEditorID(allGameShouts[startingPoint])
+			if(name == "")
+				name = allGameShouts[startingPoint].GetName()
+			endif
+            listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
             if(i == 127)
@@ -7035,6 +7063,10 @@ Function Proteus_CheatShoutSearch(Form[] foundShouts, int startingPoint, int cur
         listMenuBase.AddEntryItem("[Search Shouts]")
         i+=1
         while startingPoint <= allGameShouts.Length && i < 128
+			String name = GetFormEditorID(allGameShouts[startingPoint])
+			if(name == "")
+				name = allGameShouts[startingPoint].GetName()
+			endif
             listMenuBase.AddEntryItem(GetFormEditorID(allGameShouts[startingPoint]))
             i += 1
             startingPoint += 1
