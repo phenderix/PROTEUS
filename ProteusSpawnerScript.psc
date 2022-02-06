@@ -453,7 +453,14 @@ Function Proteus_Spawner(int startingPoint, int currentPage) ;option 0 = cheat, 
         listMenuBase.AddEntryItem("[Search]")
         i+=1
         while startingPoint <= allGameForms.Length && i < 128
-            listMenuBase.AddEntryItem(GetFormEditorID(allGameForms[startingPoint]))
+			String name = GetFormEditorID(allGameForms[startingPoint])
+			if(name == "")
+				name = allGameForms[startingPoint].GetName()
+			endif
+			if(name == "")
+				name = "(Missing Name)"
+			endif
+            listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
             if(i == 127)
@@ -507,7 +514,14 @@ Function Proteus_SpawnerSearch(Form[] foundItems, int startingPoint, int current
         listMenuBase.AddEntryItem("[Search]")
         i+=1
         while startingPoint <= allGameForms.Length && i < 128
-            listMenuBase.AddEntryItem(GetFormEditorID(allGameForms[startingPoint]))
+			String name = GetFormEditorID(allGameForms[startingPoint])
+			if(name == "")
+				name = allGameForms[startingPoint].GetName()
+			endif
+			if(name == "")
+				name = "(Missing Name)"
+			endif
+            listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
             if(i == 127)
