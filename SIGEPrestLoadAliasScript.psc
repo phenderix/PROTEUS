@@ -1,4 +1,3 @@
-
 Scriptname SIGEPrestLoadAliasScript  extends ReferenceAlias  
 
 Import PhenderixToolResourceScript
@@ -17,17 +16,14 @@ GlobalVariable property ZZPresetLoadedCounter2 auto
 ;-- Variables ---------------------------------------
 Bool raceFound
 
-
 function OnPlayerLoadGame()
 	utility.Wait(0.100000)
-	;Debug.MessageBox("ZZLoadPlayer: " + ZZLoadPlayerPreset.Getvalue() + " ZZHasSavePC: " + ZZHasSavedPlayerCharacter)
 	if(ZZLoadPlayerPreset.GetValue() == 1 && ZZHasSavedPlayerCharacter.GetValue() > 0)
 		JLoadPlayerAcrossAllSaves()
 	endIf
 	if(ZZNPCAppearanceSaved.GetValue() > 0)
 		JLoadNPCAcrossAllSaves()
 	endIf
-
 	;run second time just for good measure
 	utility.Wait(0.5)
 	if(ZZLoadPlayerPreset.GetValue() == 1 && ZZHasSavedPlayerCharacter.GetValue() > 0)
@@ -112,6 +108,7 @@ function JLoadNPCAcrossAllSaves()
 					endIf
 				EndIf
 
+				;load voice types onto applicable NPCs
 				If(fileExistsAtPath(jcontainers.userDirectory() + "/Proteus/Proteus_Character_VT_" + ZZNPCAppearanceSavedValue + "_" + processedNPCName + ".json"))
 					Int jVTList = jvalue.readFromFile(jcontainers.userDirectory() + "/Proteus/Proteus_Character_VT_" + ZZNPCAppearanceSavedValue + "_" + processedNPCName + ".json")
     				Int JVT = jmap.object()
@@ -132,6 +129,7 @@ function JLoadPlayerAcrossAllSaves()
 	Actor playerRef = Game.GetPlayer()
 	Int correctIndex = ZZPresetLoadedCounter.GetValue() as Int
 
+	;Debug.Notification("PresetLoadCounter:" + correctIndex)
 	String ZZNPCAppearanceSavedValue = Proteus_Round(ZZNPCAppearanceSaved.GetValue(),0)
 	if(fileExistsAtPath(jcontainers.userDirectory() + "/Proteus/Proteus_Character_PresetsLoaded_" + ZZNPCAppearanceSavedValue + ".json") == true) 		
 		String playerName

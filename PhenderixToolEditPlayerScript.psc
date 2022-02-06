@@ -5165,23 +5165,48 @@ String Function Proteus_SelectPresetSpawn()
 endFunction
 
 String Function Proteus_SelectPresetSpawnImport()
-	presetsLoaded = new String[100]
+	presetsLoaded = new String[120]
 
-    Int jPLAYERPRESETFormList
-    if(fileExistsAtPath(JContGlobalPath + "/Proteus/Proteus_Character_PresetsLoaded_" + Proteus_Round(ZZNPCAppearanceSaved.GetValue(),0) + ".json"))
-        jPLAYERPRESETFormList = jvalue.readFromFile(JContGlobalPath + "/Proteus/Proteus_Character_PresetsLoaded_" + Proteus_Round(ZZNPCAppearanceSaved.GetValue(),0) + ".json")
-    endIf
+	int loadedPresetCount = 0
+	int presetFileCounter = 1
+	int failStreak = 0
+	int previousPresetFileCounter = 0
 
-	Int jNFormNames = jmap.object()
-    String PLAYERPRESETFormKey = jmap.nextKey(jPLAYERPRESETFormList, "", "")
-    int i = 0
-    String value
-    while PLAYERPRESETFormKey
-        value = jmap.GetStr(jPLAYERPRESETFormList,PLAYERPRESETFormKey, none)
-        presetsLoaded[i] = value
-        i+=1
-        PLAYERPRESETFormKey = jmap.nextKey(jPLAYERPRESETFormList, PLAYERPRESETFormKey, "")
-    endWhile
+	while presetFileCounter < 120
+		if(fileExistsAtPath(JContGlobalPath + "/Proteus/Proteus_Character_PresetsLoaded_" + presetFileCounter + ".json"))
+			Int jPLAYERPRESETFormList = jvalue.readFromFile(JContGlobalPath + "/Proteus/Proteus_Character_PresetsLoaded_" + presetFileCounter + ".json")
+			Int jNFormNames = jmap.object()
+			String PLAYERPRESETFormKey = jmap.nextKey(jPLAYERPRESETFormList, "", "")
+			String value
+			while PLAYERPRESETFormKey
+				value = jmap.GetStr(jPLAYERPRESETFormList,PLAYERPRESETFormKey, none)
+				int k = 0
+				bool include = true
+				while k < loadedPresetCount
+					if(value  == presetsLoaded[k])
+						include = false
+					endIf
+					k+=1
+				endWhile
+				if include == true
+					presetsLoaded[loadedPresetCount] = value
+					loadedPresetCount += 1
+				endIf
+				PLAYERPRESETFormKey = jmap.nextKey(jPLAYERPRESETFormList, PLAYERPRESETFormKey, "")
+			endWhile
+		elseif failStreak > 3
+			presetFileCounter = 121
+		else
+			if(previousPresetFileCounter == (presetFileCounter - 1))
+				failStreak += 1
+			else
+				failStreak = 0
+			endIf
+			previousPresetFileCounter = presetFileCounter
+		endIf
+		presetFileCounter += 1
+	endWhile
+
 
 	String[] stringArray = new String[20]
 	stringArray[0] = ZZCustomM1.GetActorBase().GetName()
@@ -5209,7 +5234,7 @@ String Function Proteus_SelectPresetSpawnImport()
 
 	;remove any preset loaded that currently matches the name of an NPC
 	String[] newArray = new String[100]
-	i = 0
+	int i = 0
 	int counter
 	while i < presetsLoaded.Length && presetsLoaded[i] != ""
 		int z = 0
