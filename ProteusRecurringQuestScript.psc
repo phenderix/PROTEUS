@@ -54,6 +54,8 @@ message property ZZPlayerConfirmSpawnMessage auto
 message property ZZPlayerConfirmResetCharacter auto
 message property ZZPlayerSwitchMessage auto
 message property ZZPlayerSpawnPerksSpellsMessage auto
+message property ZZDeletePresetMenu auto
+
 
 ;GlobalVariable properties
 GlobalVariable property ZZPresetLoadedCounter auto
@@ -418,7 +420,6 @@ function keyMapCasting()
 endFunction
 
 
-
 Function Proteus_SaveGame()
 	Utility.Wait(0.1)
 	Game.SaveGame("Proteus_Save_" + Proteus_Round(ZZNPCAppearanceSaved.GetValue(), 0) + "_" + Proteus_Round(ZZZSaveGameCounter.GetValue(),0))
@@ -437,7 +438,7 @@ function Proteus_PlayerMainMenu()
 	stringArray[7] = " Piecemeal Load Character"
 	stringArray[8] = " Character Level Scaler"
 	stringArray[9] = " Open Shared Stash"
-	stringArray[10] = " Permanently Delete Character"
+	stringArray[10] = " Reset Spawn / Delete Character"
 	stringArray[11] = " Show Race Menu (Enhanced)"
 	stringArray[12] = " Edit Attributes & Skills"
 	stringArray[13] = " Toggle Factions"
@@ -508,11 +509,16 @@ function Proteus_PlayerMainMenu()
 		Proteus_OpenSharedStash()
 	elseIf result == 10 ;permanently delete character
 		Proteus_LockEnable()
-		String presetDelete = Proteus_SelectPresetSwitch()
+		String presetDelete = Proteus_SelectPresetSwitch(true)
 		if(presetDelete == "")
 			Proteus_PlayerMainMenu()
 		else
-			Proteus_DeletePlayerCharacter(presetDelete)
+			Int ibutton= ZZDeletePresetMenu.show(0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000)		
+			if ibutton == 0
+				Proteus_ResetSpawn(presetDelete)
+			elseif ibutton == 1
+				Proteus_DeletePlayerCharacter(presetDelete)
+			endIf
 		endIf
 		Proteus_LockDisable()
 	elseIf result == 11 ;racemenu enhanced
@@ -1261,7 +1267,7 @@ function Proteus_CharacterSave(Actor target, String presetNameKnown)
 		;save appearance of target's character (including race) and make system register preset
 		Proteus_SaveCharacterAppearance(presetName, target) 
 		String processedPLAYERPRESETName = processName(presetName)
-		Proteus_RegisterLoadedPresetOption(target, processedPLAYERPRESETName, presetName)
+		Proteus_RegisterLoadedPresetOption(target, processedPLAYERPRESETName, presetName, false)
 		SaveAppearancePresetJSON(processedPLAYERPRESETName, presetName)
 		SavePresetGlobalVariables(presetName)
 		Debug.Notification(characterSavingName + " appearance saved successfully.")
@@ -1326,7 +1332,7 @@ function Proteus_LoadCharacter(Actor target, String presetKnownName)
 
 	if(presetKnownName == "")
 		Debug.Notification("Select which character to switch to.")
-		presetName = Proteus_SelectPresetSwitch()	
+		presetName = Proteus_SelectPresetSwitch(false)	
 	else
 		presetName = presetKnownName
 	endIf
@@ -1396,7 +1402,7 @@ function Proteus_LoadCharacter(Actor target, String presetKnownName)
 				;make system recognize this appearance preset has been loaded
 				Proteus_SavePlayerPreset(target, presetName)
 				String processedPLAYERPRESETName = processName(presetName)
-				Proteus_RegisterLoadedPresetOption(target, processedPLAYERPRESETName, presetName)
+				Proteus_RegisterLoadedPresetOption(target, processedPLAYERPRESETName, presetName, false)
 				SaveAppearancePresetJSON(target.GetActorBase().GetName(), presetName)
 				LoadPresetGlobalVariables(presetName)
 
@@ -1466,7 +1472,7 @@ function Proteus_LoadCharacterSpawn(Actor target, String presetKnownName)
 						Proteus_LoadSkillsAttributes(presetName, target, 1) ;REENABLE
 						Proteus_LoadCharacterAppearance(presetName, target, currentRace, presetRace, 1) ;load appearance of spawned NPC
 						
-						Proteus_RegisterLoadedPresetOption(target, presetName, presetName)
+						Proteus_RegisterLoadedPresetOption(target, presetName, presetName, true)
 
 						;remove existing spells and perks from the spawn
 						Proteus_RemoveSpells(target, 0) 
@@ -3096,24 +3102,17 @@ endFunction
 
 
 function Proteus_SavePerks(String preset)
-	;initial setup
 	Perk[] knownPerks = ProteusDLLUtils.GetAllPerks(player)
 	Perk[] visiblePerks = ProteusDLLUtils.GetAllVisiblePerks(player) 
 	;Debug.Notification("Number of Perks: " + allgamePerks.Length)
 	Proteus_ExportJSONPerk(preset, visiblePerks, visiblePerks.Length, "/Proteus/Proteus_Character_VisiblePerks_", 0, 1)
-
 	Proteus_ExportJSONPerk(preset, knownPerks, knownPerks.Length, "/Proteus/Proteus_Character_Perks_", 0, 1)
 EndFunction
 
 
 function Proteus_RemovePerks(Actor target, int option) ;option 0 = switch characters, option 1 = reset character
 	if option == 0
-		Perk[] knownPerks = ProteusDLLUtils.GetAllPerks(target)
-		int g = 0
-		while g < knownPerks.Length
-			target.RemovePerk(knownPerks[g] as Perk)
-			g+=1
-		endWhile
+		RemoveAllPerks(target)
 	elseif option == 1
 		Proteus_RemovePerks_SlowCheckingProcess(target, 1)
 	endIf
@@ -3125,161 +3124,10 @@ function Proteus_RemovePerks_SlowCheckingProcess(Actor target, int option)
 	;initial setup
 	int perkCountTracker = 0
 	Form[] allGamePerks = Utility.CreateFormArray(5000)
-	;Form[] tempArray = Utility.CreateFormArray(5000)
-	
-	Perk[] tempArray = new Perk[128]
 	int i
-	;Alchemy
-	tempArray = ActorValueInfo.GetActorValueInfoByName("Alchemy").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
 
-	;Alteration
-	tempArray = ActorValueInfo.GetActorValueInfoByName("Alteration").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	;Block
-	tempArray = ActorValueInfo.GetActorValueInfoByName("Block").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	;Conjuration
-	tempArray = ActorValueInfo.GetActorValueInfoByName("Conjuration").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	;Destruction
-	tempArray = ActorValueInfo.GetActorValueInfoByName("Destruction").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	;Enchanting
-	tempArray = ActorValueInfo.GetActorValueInfoByName("Enchanting").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
+	RemovePerksForAllTrees(target)
 	
-	;Illusion
-	if(vokriinatorActive == false)
-		tempArray = ActorValueInfo.GetActorValueInfoByName("Illusion").GetPerks(player, 0, 1)
-		i = 0
-		while i < tempArray.length && tempArray[i] != NONE
-			allGamePerks[perkCountTracker] = tempArray[i]
-			perkCountTracker+=1
-			i+=1    
-		endwhile
-	endIf
-	;LightArmor
-	tempArray = ActorValueInfo.GetActorValueInfoByName("LightArmor").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	;Lockpicking
-	tempArray = ActorValueInfo.GetActorValueInfoByName("Lockpicking").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	
-	;HeavyArmor
-	tempArray = ActorValueInfo.GetActorValueInfoByName("HeavyArmor").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	;Marksman
-	tempArray = ActorValueInfo.GetActorValueInfoByName("Marksman").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	;OneHanded
-	tempArray = ActorValueInfo.GetActorValueInfoByName("OneHanded").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	;Pickpocket
-	tempArray = ActorValueInfo.GetActorValueInfoByName("Pickpocket").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	
-	;Restoration
-	tempArray = ActorValueInfo.GetActorValueInfoByName("Restoration").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	;Smithing
-	tempArray = ActorValueInfo.GetActorValueInfoByName("Smithing").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	;Sneak
-	tempArray = ActorValueInfo.GetActorValueInfoByName("Sneak").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	;Speechcraft
-	tempArray = ActorValueInfo.GetActorValueInfoByName("Speechcraft").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
-	
-	;TwoHanded
-	tempArray = ActorValueInfo.GetActorValueInfoByName("TwoHanded").GetPerks(player, 0, 1)
-	i = 0
-	while i < tempArray.length && tempArray[i] != NONE
-		allGamePerks[perkCountTracker] = tempArray[i]
-		perkCountTracker+=1
-		i+=1    
-	endwhile
 	;add all vanilla vampire and werewolf perks to JMap
 	i = 0
 	while i < ZZVanillaPerksListVampireWerewolf.GetSize() && ZZVanillaPerksListVampireWerewolf != NONE
@@ -5001,12 +4849,7 @@ endFunction
 
 Function Proteus_SwitchCharacter()
 
-	String targetSwitchName = Proteus_SelectPresetSwitch()
-
-	;save current character 
-	String playerName = player.GetActorBase().GetName()
-	Proteus_CharacterSave(player, playerName)
-	Utility.Wait(0.1)
+	String targetSwitchName = Proteus_SelectPresetSwitch(false)
 
 	if(targetSwitchName != "")
 		;find this presetname character
@@ -5059,6 +4902,10 @@ Function Proteus_SwitchCharacter()
 		String playerPresetName
 
 		if (targetNameLength > 0)	
+			;save current character 
+			String playerName = player.GetActorBase().GetName()
+			Proteus_CharacterSave(player, playerName)
+			Utility.Wait(0.1)
 
 			if(fileExistsAtPath(JContGlobalPath + "/Proteus/Proteus_NPC_GeneralInfo_" + Proteus_Round(ZZNPCAppearanceSaved.GetValue(),0) + "_" + targetName + ".json"))
 				Int JNPCList = jvalue.readFromFile(JContGlobalPath + "/Proteus/Proteus_NPC_GeneralInfo_" + Proteus_Round(ZZNPCAppearanceSaved.GetValue(),0) + "_" + targetName + ".json")
@@ -5295,7 +5142,7 @@ endFunction
 
 
 
-function Proteus_RegisterLoadedPresetOption(Actor targetName, String processedPLAYERPRESETName, String presetName)
+function Proteus_RegisterLoadedPresetOption(Actor targetName, String processedPLAYERPRESETName, String presetName, bool isSpawn)
 	playerPresetFirstLoad = false
     Int jPLAYERPRESETFormList
     if(fileExistsAtPath(JContGlobalPath + "/Proteus/Proteus_Character_PresetsLoaded_" + Proteus_Round(ZZNPCAppearanceSaved.GetValue(),0) + ".json"))
@@ -5311,7 +5158,9 @@ function Proteus_RegisterLoadedPresetOption(Actor targetName, String processedPL
         if value == processedPLAYERPRESETName
             insertNewPLAYERPRESET = false
             jmap.SetStr(jNFormNames, i + "_ProteusPlayerPreset_" + processedPLAYERPRESETName, value)
-			ZZPresetLoadedCounter.SetValue(i)
+			if(!isSpawn)
+				ZZPresetLoadedCounter.SetValue(i)
+			endif
         else
             jmap.SetStr(jNFormNames, PLAYERPRESETFormKey, value)
         endIf
@@ -5320,7 +5169,9 @@ function Proteus_RegisterLoadedPresetOption(Actor targetName, String processedPL
     endWhile
     if insertNewPLAYERPRESET == true
         jmap.SetStr(jNFormNames, i + "_ProteusPlayerPreset_" + processedPLAYERPRESETName, presetName)
-		ZZPresetLoadedCounter.SetValue(i)
+		if(!isSpawn)
+			ZZPresetLoadedCounter.SetValue(i)
+		endif
 		playerPresetFirstLoad = true
     endIf
     jvalue.writeToFile(jNFormNames, JContGlobalPath + "/Proteus/Proteus_Character_PresetsLoaded_" + Proteus_Round(ZZNPCAppearanceSaved.GetValue(),0) + ".json")
@@ -5328,7 +5179,7 @@ endFunction
 
 
 
-String Function Proteus_SelectPresetSwitch()
+String Function Proteus_SelectPresetSwitch(bool delete)
 	presetsLoaded = new String[100]
     Int jPLAYERPRESETFormList
     if(fileExistsAtPath(JContGlobalPath + "/Proteus/Proteus_Character_PresetsLoaded_" + Proteus_Round(ZZNPCAppearanceSaved.GetValue(),0) + ".json"))
@@ -5349,6 +5200,7 @@ String Function Proteus_SelectPresetSwitch()
 		endIf
         PLAYERPRESETFormKey = jmap.nextKey(jPLAYERPRESETFormList, PLAYERPRESETFormKey, "")
     endWhile
+
 
 	String[] stringArray = new String[20]
 	stringArray[0] = ZZCustomM1.GetActorBase().GetName()
@@ -5372,19 +5224,24 @@ String Function Proteus_SelectPresetSwitch()
 	stringArray[18] = ZZCustomF9.GetActorBase().GetName()
 	stringArray[19] = ZZCustomF10.GetActorBase().GetName()
 
-	;remove any preset loaded that currently matches the name of an NPC
+	;include any preset loaded that currently matches the name of an NPC
 	String[] newArray = new String[100]
 	i = 0
 	int counter
 	while i < presetsLoaded.Length && presetsLoaded[i] != ""
 		int z = 0
 		bool include = false
-		while z < stringArray.Length && stringArray[z] != ""	;don't include characters already on spawns in the list
-			if(presetsLoaded[i] == stringArray[z])
-				include = true
-			endIf
-			z += 1
-		endWhile
+		if delete == false
+			while z < stringArray.Length && stringArray[z] != ""	;include characters already on spawns in the list
+				if(presetsLoaded[i] == stringArray[z])
+					include = true
+				endIf
+				z += 1
+			endWhile
+		elseif delete == true
+			include = true
+		endIf
+
 		if presetsLoaded[i] == playerName ;don't include current player character in import list
 			include = false
 		endIf
@@ -5416,7 +5273,6 @@ String Function Proteus_SelectPresetSwitch()
 	int exitOption = k
 
 	if (result == exitOption)
-		;Debug.Notification("No preset selected.")
 		return ""
 	else
 		return stringArray2[result]
@@ -5483,23 +5339,48 @@ String Function Proteus_SelectPresetSpawn()
 endFunction
 
 String Function Proteus_SelectPresetSpawnImport()
-	presetsLoaded = new String[100]
+	presetsLoaded = new String[120]
 
-    Int jPLAYERPRESETFormList
-    if(fileExistsAtPath(JContGlobalPath + "/Proteus/Proteus_Character_PresetsLoaded_" + Proteus_Round(ZZNPCAppearanceSaved.GetValue(),0) + ".json"))
-        jPLAYERPRESETFormList = jvalue.readFromFile(JContGlobalPath + "/Proteus/Proteus_Character_PresetsLoaded_" + Proteus_Round(ZZNPCAppearanceSaved.GetValue(),0) + ".json")
-    endIf
+	int loadedPresetCount = 0
+	int presetFileCounter = 1
+	int failStreak = 0
+	int previousPresetFileCounter = 0
 
-	Int jNFormNames = jmap.object()
-    String PLAYERPRESETFormKey = jmap.nextKey(jPLAYERPRESETFormList, "", "")
-    int i = 0
-    String value
-    while PLAYERPRESETFormKey
-        value = jmap.GetStr(jPLAYERPRESETFormList,PLAYERPRESETFormKey, none)
-        presetsLoaded[i] = value
-        i+=1
-        PLAYERPRESETFormKey = jmap.nextKey(jPLAYERPRESETFormList, PLAYERPRESETFormKey, "")
-    endWhile
+	while presetFileCounter < 120
+		if(fileExistsAtPath(JContGlobalPath + "/Proteus/Proteus_Character_PresetsLoaded_" + presetFileCounter + ".json"))
+			Int jPLAYERPRESETFormList = jvalue.readFromFile(JContGlobalPath + "/Proteus/Proteus_Character_PresetsLoaded_" + presetFileCounter + ".json")
+			Int jNFormNames = jmap.object()
+			String PLAYERPRESETFormKey = jmap.nextKey(jPLAYERPRESETFormList, "", "")
+			String value
+			while PLAYERPRESETFormKey
+				value = jmap.GetStr(jPLAYERPRESETFormList,PLAYERPRESETFormKey, none)
+				int k = 0
+				bool include = true
+				while k < loadedPresetCount
+					if(value  == presetsLoaded[k])
+						include = false
+					endIf
+					k+=1
+				endWhile
+				if include == true
+					presetsLoaded[loadedPresetCount] = value
+					loadedPresetCount += 1
+				endIf
+				PLAYERPRESETFormKey = jmap.nextKey(jPLAYERPRESETFormList, PLAYERPRESETFormKey, "")
+			endWhile
+		elseif failStreak > 3
+			presetFileCounter = 121
+		else
+			if(previousPresetFileCounter == (presetFileCounter - 1))
+				failStreak += 1
+			else
+				failStreak = 0
+			endIf
+			previousPresetFileCounter = presetFileCounter
+		endIf
+		presetFileCounter += 1
+	endWhile
+
 
 	String[] stringArray = new String[20]
 	stringArray[0] = ZZCustomM1.GetActorBase().GetName()
@@ -5527,7 +5408,7 @@ String Function Proteus_SelectPresetSpawnImport()
 
 	;remove any preset loaded that currently matches the name of an NPC
 	String[] newArray = new String[100]
-	i = 0
+	int i = 0
 	int counter
 	while i < presetsLoaded.Length && presetsLoaded[i] != ""
 		int z = 0
@@ -5823,7 +5704,6 @@ endFunction
 
 Function Proteus_DeletePlayerCharacter(String presetName)
 	Bool deleteChar = true
-
 	;CANNOT DELETE CURRENTLY LOADED PRESET - check which preset is currently loaded
 	if(fileExistsAtPath(JContGlobalPath + "/Proteus/Proteus_Character_PresetLoaded_" + Proteus_Round(ZZNPCAppearanceSaved.GetValue(),0) + ".json"))
 		Int JPlayerList = jvalue.readFromFile(JContGlobalPath + "/Proteus/Proteus_Character_PresetLoaded_" + Proteus_Round(ZZNPCAppearanceSaved.GetValue(),0) + ".json")
@@ -6846,6 +6726,8 @@ Function Proteus_CheatItem(int startingPoint, int currentPage, int typeCode) ;op
 		typeString = "Scrolls"
 	elseif typeCode == 27
 		typeString = "Books"
+	elseif typeCode == 42
+		typeString = "Ammo"
 	endIf
 
     int numPages = (allGameItems.Length / 127) as Int
@@ -6890,8 +6772,9 @@ Function Proteus_CheatItem(int startingPoint, int currentPage, int typeCode) ;op
 			Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?") as Int
 			Utility.Wait(0.1)
 			if (itemAmount > 0)   
-				player.AddItem(selectedItem, itemAmount)
-				if(typeCode == 41 || typeCode == 26)
+				player.AddItem(selectedItem, itemAmount,  true)
+				Debug.Notification(Proteus_Round(itemAmount, 0) + " " + GetFormEditorID(selectedItem) + " added to inventory.")
+				if(typeCode == 41 || typeCode == 26 || typeCode == 42)
 					Utility.Wait(0.1)
 					player.EquipItem(selectedItem)
 				endIf
@@ -6904,8 +6787,9 @@ Function Proteus_CheatItem(int startingPoint, int currentPage, int typeCode) ;op
 			Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?") as Int
 			Utility.Wait(0.1)
 			if (itemAmount > 0)   
-				player.AddItem(selectedItem, itemAmount)
-				if(typeCode == 41 || typeCode == 26)
+				player.AddItem(selectedItem, itemAmount,  true)
+				Debug.Notification(Proteus_Round(itemAmount, 0) + " " + GetFormEditorID(selectedItem) + " added to inventory.")
+				if(typeCode == 41 || typeCode == 26 || typeCode == 42)
 					Utility.Wait(0.1)
 					player.EquipItem(selectedItem)
 				endIf
@@ -6932,6 +6816,8 @@ Function Proteus_CheatItemSearch(Form[] foundItems, int startingPoint, int curre
 		typeString = "Scrolls"
 	elseif typeCode == 27
 		typeString = "Books"
+	elseif typeCode == 42
+		typeString = "Ammo"
 	endIf
 
     int numPages = (allGameItems.Length / 127) as Int
@@ -6975,8 +6861,9 @@ Function Proteus_CheatItemSearch(Form[] foundItems, int startingPoint, int curre
 			Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?") as Int
 			Utility.Wait(0.1)
 			if (itemAmount > 0)   
-				player.AddItem(selectedItem, itemAmount)
-				if(typeCode == 41 || typeCode == 26)
+				player.AddItem(selectedItem, itemAmount,  true)
+				Debug.Notification(Proteus_Round(itemAmount, 0) + " " + GetFormEditorID(selectedItem) + " added to inventory.")
+				if(typeCode == 41 || typeCode == 26 || typeCode == 42)
 					Utility.Wait(0.1)
 					player.EquipItem(selectedItem)
 				endIf
@@ -6989,8 +6876,9 @@ Function Proteus_CheatItemSearch(Form[] foundItems, int startingPoint, int curre
 			Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?") as Int
 			Utility.Wait(0.1)
 			if (itemAmount > 0)   
-				player.AddItem(selectedItem, itemAmount)
-				if(typeCode == 41 || typeCode == 26)
+				player.AddItem(selectedItem, itemAmount,  true)
+				Debug.Notification(Proteus_Round(itemAmount, 0) + " " + GetFormEditorID(selectedItem) + " added to inventory.")
+				if(typeCode == 41 || typeCode == 26 || typeCode == 42)
 					Utility.Wait(0.1)
 					player.EquipItem(selectedItem)
 				endIf
@@ -7361,3 +7249,4 @@ Function Proteus_CheatShoutSearch(Form[] foundShouts, int startingPoint, int cur
         endIf
     endIf
 EndFunction
+

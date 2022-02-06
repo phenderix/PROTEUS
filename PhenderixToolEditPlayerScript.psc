@@ -34,6 +34,7 @@ message property ZZPlayerConfirmSpawnMessage auto
 message property ZZPlayerConfirmResetCharacter auto
 message property ZZPlayerSwitchMessage auto
 message property ZZPlayerSpawnPerksSpellsMessage auto
+message property ZZDeletePresetMenu auto
 
 ;GlobalVariable properties
 GlobalVariable property ZZPresetLoadedCounter auto
@@ -273,7 +274,7 @@ function Proteus_PlayerMainMenu()
 	stringArray[7] = " Piecemeal Load Character"
 	stringArray[8] = " Character Level Scaler"
 	stringArray[9] = " Open Shared Stash"
-	stringArray[10] = " Permanently Delete Character"
+	stringArray[10] = " Reset Spawn / Delete Character"
 	stringArray[11] = " Show Race Menu (Enhanced)"
 	stringArray[12] = " Edit Attributes & Skills"
 	stringArray[13] = " Toggle Factions"
@@ -344,11 +345,16 @@ function Proteus_PlayerMainMenu()
 		Proteus_OpenSharedStash()
 	elseIf result == 10 ;permanently delete character
 		Proteus_LockEnable()
-		String presetDelete = Proteus_SelectPresetSwitch()
+		String presetDelete = Proteus_SelectPresetSwitch(true)
 		if(presetDelete == "")
 			Proteus_PlayerMainMenu()
 		else
-			Proteus_DeletePlayerCharacter(presetDelete)
+			Int ibutton= ZZDeletePresetMenu.show(0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000)		
+			if ibutton == 0
+				Proteus_ResetSpawn(presetDelete)
+			elseif ibutton == 1
+				Proteus_DeletePlayerCharacter(presetDelete)
+			endIf
 		endIf
 		Proteus_LockDisable()
 	elseIf result == 11 ;racemenu enhanced
@@ -1162,7 +1168,7 @@ function Proteus_LoadCharacter(Actor target, String presetKnownName)
 
 	if(presetKnownName == "")
 		Debug.Notification("Select which character to switch to.")
-		presetName = Proteus_SelectPresetSwitch()	
+		presetName = Proteus_SelectPresetSwitch(false)	
 	else
 		presetName = presetKnownName
 	endIf
@@ -4679,12 +4685,7 @@ endFunction
 
 Function Proteus_SwitchCharacter()
 
-	String targetSwitchName = Proteus_SelectPresetSwitch()
-
-	;save current character 
-	String playerName = player.GetActorBase().GetName()
-	Proteus_CharacterSave(player, playerName)
-	Utility.Wait(0.1)
+	String targetSwitchName = Proteus_SelectPresetSwitch(false)
 
 	if(targetSwitchName != "")
 		;find this presetname character
@@ -4737,6 +4738,10 @@ Function Proteus_SwitchCharacter()
 		String playerPresetName
 
 		if (targetNameLength > 0)	
+			;save current character 
+			String playerName = player.GetActorBase().GetName()
+			Proteus_CharacterSave(player, playerName)
+			Utility.Wait(0.1)
 
 			if(fileExistsAtPath(JContGlobalPath + "/Proteus/Proteus_NPC_GeneralInfo_" + Proteus_Round(ZZNPCAppearanceSaved.GetValue(),0) + "_" + targetName + ".json"))
 				Int JNPCList = jvalue.readFromFile(JContGlobalPath + "/Proteus/Proteus_NPC_GeneralInfo_" + Proteus_Round(ZZNPCAppearanceSaved.GetValue(),0) + "_" + targetName + ".json")
@@ -5010,7 +5015,7 @@ endFunction
 
 
 
-String Function Proteus_SelectPresetSwitch()
+String Function Proteus_SelectPresetSwitch(bool delete)
 	presetsLoaded = new String[100]
     Int jPLAYERPRESETFormList
     if(fileExistsAtPath(JContGlobalPath + "/Proteus/Proteus_Character_PresetsLoaded_" + Proteus_Round(ZZNPCAppearanceSaved.GetValue(),0) + ".json"))
@@ -5031,6 +5036,7 @@ String Function Proteus_SelectPresetSwitch()
 		endIf
         PLAYERPRESETFormKey = jmap.nextKey(jPLAYERPRESETFormList, PLAYERPRESETFormKey, "")
     endWhile
+
 
 	String[] stringArray = new String[20]
 	stringArray[0] = ZZCustomM1.GetActorBase().GetName()
@@ -5054,19 +5060,24 @@ String Function Proteus_SelectPresetSwitch()
 	stringArray[18] = ZZCustomF9.GetActorBase().GetName()
 	stringArray[19] = ZZCustomF10.GetActorBase().GetName()
 
-	;remove any preset loaded that currently matches the name of an NPC
+	;include any preset loaded that currently matches the name of an NPC
 	String[] newArray = new String[100]
 	i = 0
 	int counter
 	while i < presetsLoaded.Length && presetsLoaded[i] != ""
 		int z = 0
 		bool include = false
-		while z < stringArray.Length && stringArray[z] != ""	;don't include characters already on spawns in the list
-			if(presetsLoaded[i] == stringArray[z])
-				include = true
-			endIf
-			z += 1
-		endWhile
+		if delete == false
+			while z < stringArray.Length && stringArray[z] != ""	;include characters already on spawns in the list
+				if(presetsLoaded[i] == stringArray[z])
+					include = true
+				endIf
+				z += 1
+			endWhile
+		elseif delete == true
+			include = true
+		endIf
+
 		if presetsLoaded[i] == playerName ;don't include current player character in import list
 			include = false
 		endIf
@@ -5098,7 +5109,6 @@ String Function Proteus_SelectPresetSwitch()
 	int exitOption = k
 
 	if (result == exitOption)
-		;Debug.Notification("No preset selected.")
 		return ""
 	else
 		return stringArray2[result]
@@ -5530,7 +5540,6 @@ endFunction
 
 Function Proteus_DeletePlayerCharacter(String presetName)
 	Bool deleteChar = true
-
 	;CANNOT DELETE CURRENTLY LOADED PRESET - check which preset is currently loaded
 	if(fileExistsAtPath(JContGlobalPath + "/Proteus/Proteus_Character_PresetLoaded_" + Proteus_Round(ZZNPCAppearanceSaved.GetValue(),0) + ".json"))
 		Int JPlayerList = jvalue.readFromFile(JContGlobalPath + "/Proteus/Proteus_Character_PresetLoaded_" + Proteus_Round(ZZNPCAppearanceSaved.GetValue(),0) + ".json")
