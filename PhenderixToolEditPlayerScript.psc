@@ -1283,7 +1283,7 @@ function Proteus_LoadCharacterSpawn(Actor target, String presetKnownName)
 		Debug.Notification("Select which character to spawn as an enemy.")
 		presetName = Proteus_SelectPresetSpawn()
 	elseif(presetKnownName == "")
-		Debug.Notification("Select which character to spawn as an ally.")
+		Debug.Notification("Select which character to import.")
 		presetName = Proteus_SelectPresetSpawnImport()
 	else
 		presetName = presetKnownName
@@ -3572,7 +3572,8 @@ Function Proteus_LoadItems2(String presetName, Actor target, int counter)
     String ItemFormKey = jmap.nextKey(JItemMapList, "", "")
     while ItemFormKey 
         Form value = jmap.GetForm(JItemMapList, ItemFormKey, none) as Form
-        int amount = StringUtil.Substring(ItemFormKey, StringUtil.Find(ItemFormKey, "ProteusCount") + 12, StringUtil.Find(ItemFormKey, "_ProteusHand")) as Int
+        int amount = StringUtil.Substring(ItemFormKey, StringUtil.Find(ItemFormKey, "ProteusCount") + 13) as Int
+
 		target.AddItem(value, amount)
         ItemFormKey = jmap.nextKey(JItemMapList, ItemFormKey, "")
     endwhile
