@@ -1,9 +1,9 @@
 Scriptname SIGEPrestLoadAliasScript  extends ReferenceAlias  
 
+Import ProteusDLLUtils
 Import PhenderixToolResourceScript
 Import CharGen
 Import JContainers
-Import ConsoleUtil
 
 ;-- Properties --------------------------------------
 GlobalVariable property ZZLoadPlayerPreset auto
@@ -15,9 +15,12 @@ GlobalVariable property ZZPresetLoadedCounter2 auto
 
 ;-- Variables ---------------------------------------
 Bool raceFound
+String JContGlobalPath
+Float targetCW ;not used as of now
 
 function OnPlayerLoadGame()
 	utility.Wait(0.100000)
+	JContGlobalPath = jcontainers.userdirectory() ;sets JContainers directory for file paths
 	if(ZZLoadPlayerPreset.GetValue() == 1 && ZZHasSavedPlayerCharacter.GetValue() > 0)
 		JLoadPlayerAcrossAllSaves()
 	endIf
@@ -56,7 +59,6 @@ function JLoadNPCAcrossAllSaves()
 				;Debug.MessageBox("NPCNameProcessed: " + NPCNameProcessed)
 				if(procNameLength > 0)
 					NPCNameArray[i] = NPCNameProcessed
-					;Debug.MessageBox("PRE NPC NAME IS: " + NPCForm)
 					(NPCArray[i] as Actor).SetName(NPCNameProcessed)
 					(NPCArray[i] as Actor).GetActorBase().SetName(NPCNameProcessed)
 				endIf
@@ -119,6 +121,10 @@ function JLoadNPCAcrossAllSaves()
 					endIf
 				endIf
 				i += 1
+
+				;equip items back onto npcs, ensures they aren't wearing their default outfit
+				Proteus_EquipItems(processedNPCName, (NPCArray[i] as Actor))
+
 			endIf
 		endWhile
 	EndIf
@@ -231,40 +237,38 @@ Function Proteus_LoadCharacterAppearance(String presetName, Actor target, Race c
 	endIf
 endFunction
 
-
-
-;postTargetAcquire (0 = spawned character, 1 = load appearance preset, 2 = swap characters)
-function Proteus_LoadTargetStrings(String presetName, Actor target, int postTargetAcquire)
-	if(fileExistsAtPath(jcontainers.userDirectory() + "/Proteus/Proteus_Character_GeneralInfo_" + presetName + ".json"))
-		Int JStringList = jvalue.readFromFile(jcontainers.userDirectory() + "/Proteus/Proteus_Character_GeneralInfo_" + presetName + ".json")
+;option (1 = load appearance preset, 2 = siwtch / spawn characters)
+function Proteus_LoadTargetStrings(String presetName, Actor target, int option)
+	if(fileExistsAtPath(JContGlobalPath + "/Proteus/Proteus_Character_GeneralInfo_" + presetName + ".json"))
+		Int JStringList = jvalue.readFromFile(JContGlobalPath + "/Proteus/Proteus_Character_GeneralInfo_" + presetName + ".json")
 		Int maxCount = jvalue.Count(JStringList )
-
 		Int jStats = jmap.object()
 		Int i = 0
 		String text = jmap.nextKey(JStringList, "", "")
-
+		String value
 		while i < maxCount
-			String value = jmap.GetStr(JStringList, text, "")
+			value = jmap.GetStr(JStringList, text, "")
 			if text == "name"
-				;set target name to other character name
-				if(postTargetAcquire == 2)
-					;target.GetActorBase().SetName(value)
+				if(option == 2)  ;set target name to other character name
+					target.SetName(value)
+					target.GetActorBase().SetName(value)
 				endIf
 			elseif text == "gender"
-				if(postTargetAcquire == 2 || postTargetAcquire == 1)
-					if((target.GetActorBase()).GetSex() == 0 && value == 0)
-					elseif((target.GetActorBase()).GetSex() == 1 && value == 1)
-					else
-						SetSelectedReference(target)
-						ExecuteCommand("sexchange")
-					EndIf
+				if(value == 0) ;male
+					SetSex(target, 0) 
+				Elseif (value == 1) ;female
+					SetSex(target, 1) 
 				endIf
 			elseif text == "race"
+			elseif text == "CarryWeight"
+				if(option == 2)
+					targetCW = value as Float
+				endIf
 			EndIf
 			text = jmap.nextKey(JStringList, text, "")
 			i += 1
 		endWhile
-		;debug.Notification("Name loaded from the Proteus system.")
+	else
 	EndIf
 endFunction
 
@@ -284,3 +288,36 @@ Race Function Proteus_LoadCharacterRace(String presetName)
 	EndIf
 	return presetRace
 endFunction
+
+
+Function Proteus_EquipItems(String preset, Actor target)
+	if(fileExistsAtPath(JContGlobalPath + "/Proteus/Proteus_Character_EquippedItems_" +  preset + ".json"))
+		Int JItemMapList = jvalue.readFromFile(JContGlobalPath + "/Proteus/Proteus_Character_EquippedItems_" +  preset + ".json")
+		Int jItemFormNames = jmap.object()
+		String ItemFormKey = jmap.nextKey(JItemMapList, "", "")
+		Form itemWeaponLoaded
+
+		while ItemFormKey 
+			Form value = jmap.GetForm(JItemMapList, ItemFormKey, none) as Form
+			;Find Item Count
+			Int index1 = stringutil.Find(ItemFormKey, "ProteusCount", 0)
+			Int index2 = stringutil.Find(ItemFormKey, "_ProteusHand", 0)
+			String s1 = stringutil.Substring(ItemFormKey, index1+12, index2-index1)
+			Int valueType = value.GetType()
+			String substringTest = StringUtil.Substring(ItemFormKey, StringUtil.GetLength(ItemFormKey) - 1, 1)
+			if(valueType == 41)
+				if(substringTest == "L")
+					target.EquipItemEx(value, 2, false, true)
+				elseif(substringTest == "R")
+					target.EquipItemEx(value, 1, false, true)
+				elseif(substringTest == "B")
+					target.EquipItemEx(value, 1, false, true)
+					target.EquipItemEx(value, 2, false, true)
+				EndIf
+			else
+				target.EquipItem(value, false, true)	
+			EndIf
+			ItemFormKey = jmap.nextKey(JItemMapList, ItemFormKey, "")
+		endwhile
+	endIf
+EndFunction

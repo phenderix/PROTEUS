@@ -91,9 +91,11 @@ Bool acebloodActive
 Bool mysticiscmActive
 Bool edmActive
 int listTimesCounter
+Actor npcTarget
 
 ;-- Functions ---------------------------------------
 function OnEffectStart(Actor akTarget, Actor akCaster)
+	npcTarget = akTarget
 	if(ZZNPCAppearanceSaved.GetValue() == 0)
 		WorldIdentityFunction()
 	endIf
@@ -426,15 +428,16 @@ EndFunction
 
 Function Proteus_NPCMagicFunction(Actor gTarget)
 	string[] stringArray
-	stringArray= new String[3]
-	stringArray[0] = " Forget / Teach Spell"
-	;stringArray[1] = " Edit NPC Equipped Spell"
-	stringArray[1] = " Back"
-	stringArray[2] = " Exit"
+	stringArray= new String[5]
+	stringArray[0] = " Remove/Teach NPC Spell"
+	stringArray[1] = " Add Spell to NPC"
+	stringArray[2] = " Add Perk to NPC"
+	stringArray[3] = " Back"
+	stringArray[4] = " Exit"
 
 	UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
 	if listMenu
-		int n = 3
+		int n = 5
 		int i = 0
 		while i < n
 			listMenu.AddEntryItem(stringArray[i])
@@ -445,17 +448,18 @@ Function Proteus_NPCMagicFunction(Actor gTarget)
 	listMenu.OpenMenu()
 	int result = listMenu.GetResultInt()
 
-	if result == 0 ;teach spell
+	if result == 0 ;forget or teach spell
 		UIMagicMenu magicMenu = UIExtensions.GetMenu("UIMagicMenu") as UIMagicMenu
 		magicMenu.SetPropertyForm("receivingActor", Game.GetPlayer())
 		magicMenu.OpenMenu(gTarget)
 		magicMenu = None
-	;elseif result == 1
-		;spellEdit.Cast(gTarget)
 	elseif result == 1
-		Proteus_NPCMainMenu(gTarget)
+		Proteus_CheatSpell(0, 1, 22)
 	elseif result == 2
-		
+		Proteus_CheatPerk(0, 1, 92)
+	elseif result == 3 ;back
+		Proteus_NPCMainMenu(gTarget)
+	elseif result == 4 ;exit
 	endIf
 EndFunction
 
@@ -3311,3 +3315,241 @@ Function Proteus_NPCVoiceTypeExhaustiveSearch(Actor target, Form[] foundItems, i
     endIf
 EndFunction
 
+
+
+
+
+
+
+Function Proteus_CheatSpell(int startingPoint, int currentPage, int typeCode) ;option 0 = cheat, 1 = reset
+    Debug.Notification("Spell menu loading...may take a few seconds!")
+    Form[] allGameSpells = GetAllForms(typeCode) ;get all Spells in game and from mods
+
+    int numPages = (allGameSpells.Length / 127) as Int
+    int startingPointInitial = startingPoint
+
+    UIListMenu listMenuBase = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+    if listMenuBase 
+        int i = 0
+        listMenuBase.AddEntryItem("[Done Adding Spells]")
+        i+=1
+        listMenuBase.AddEntryItem("[Search Spells]")
+        i+=1
+        while startingPoint <= allGameSpells.Length && i < 128
+			String name = GetFormEditorID(allGameSpells[startingPoint])
+			if(name == "")
+				name = allGameSpells[startingPoint].GetName()
+			endif
+            listMenuBase.AddEntryItem(name)
+            i += 1
+            startingPoint += 1
+            if(i == 127)
+                listMenuBase.AddEntryItem("[Continue to Page " + Proteus_Round(currentPage + 1, 0) as String + " of " + Proteus_Round(numPages, 0) as String + "]")
+            endIf
+        endwhile
+    EndIf
+    listMenuBase.OpenMenu()
+    int result = listMenuBase.GetResultInt()
+    if result == 1 ;search option
+        String searchTerm = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Search for:")
+        Utility.Wait(0.1)
+        Int lengthSearchTerm = StringUtil.GetLength(searchTerm)
+        if (lengthSearchTerm > 0)   
+            int spellCount = ProteusDLLUtils.ProteusGetItemCount(searchTerm, typeCode)
+			Form[] foundSpells = ProteusDLLUtils.ProteusGetItemBySearch(searchTerm, typeCode)
+            Proteus_CheatSpellSearch(foundSpells, 0, 1, typeCode)
+        else
+            Debug.Notification("Invalid length search term.")
+        endIf
+
+    elseif result == 127 ;next page option
+        currentPage += 1
+        Proteus_CheatSpell(startingPoint, currentPage, typeCode)
+    elseif(result > 0 && result != 127)
+        if(startingPoint > 127)
+            Form selectedSpell = allGameSpells[startingPointInitial + result - 2]
+            npcTarget.AddSpell(selectedSpell as Spell)
+            Proteus_CheatSpell(startingPointInitial, currentPage, typeCode)
+        Else
+            Form selectedSpell = allGameSpells[result - 2]
+            npcTarget.AddSpell(selectedSpell as Spell)
+            Proteus_CheatSpell(startingPointInitial, currentPage, typeCode)
+        endIf
+    endIf
+EndFunction
+
+Function Proteus_CheatSpellSearch(Form[] foundSpells, int startingPoint, int currentPage, int typeCode) ;option 0 = cheat, 1 = reset
+    Debug.Notification("Spell menu loading...may take a few seconds!")
+    Form[] allGameSpells = foundSpells ;get all Spells in game and from mods
+
+    int numPages = (allGameSpells.Length / 127) as Int
+    int startingPointInitial = startingPoint
+
+    UIListMenu listMenuBase = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+    if listMenuBase 
+        int i = 0
+        listMenuBase.AddEntryItem("[Done Adding Spells]")
+        i+=1
+        listMenuBase.AddEntryItem("[Search Spells]")
+        i+=1
+        while startingPoint <= allGameSpells.Length && i < 128
+			String name = GetFormEditorID(allGameSpells[startingPoint])
+			if(name == "")
+				name = allGameSpells[startingPoint].GetName()
+			endif
+            listMenuBase.AddEntryItem(name)
+            i += 1
+            startingPoint += 1
+            if(i == 127)
+                listMenuBase.AddEntryItem("[Continue to Page " + Proteus_Round(currentPage + 1, 0) as String + " of " + Proteus_Round(numPages, 0) as String + "]")
+            endIf
+        endwhile
+    EndIf
+    listMenuBase.OpenMenu()
+    int result = listMenuBase.GetResultInt()
+    if result == 1 ;search option
+        String searchTerm = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Search for:")
+        Utility.Wait(0.1)
+        Int lengthSearchTerm = StringUtil.GetLength(searchTerm)
+        if (lengthSearchTerm > 0)   
+            int spellCount = ProteusDLLUtils.ProteusGetItemCount(searchTerm, typeCode)
+			Form[] foundSpells2 = ProteusDLLUtils.ProteusGetItemBySearch(searchTerm, typeCode)
+            Proteus_CheatSpellSearch(foundSpells2, 0, 1, typeCode)
+        else
+            Debug.Notification("Invalid length search term.")
+        endIf
+    elseif result == 127 ;next page option
+        currentPage += 1
+        Proteus_CheatSpellSearch(foundSpells, startingPoint, currentPage, typeCode)
+    elseif(result > 0 && result != 127)
+        if(startingPoint > 127)
+            Form selectedSpell = allGameSpells[startingPointInitial + result - 2]
+            npcTarget.AddSpell(selectedSpell as Spell)
+            Proteus_CheatSpellSearch(foundSpells, startingPointInitial, currentPage, typeCode)
+        Else
+            Form selectedSpell = foundSpells[result - 2]
+            npcTarget.AddSpell(selectedSpell as Spell)
+            Proteus_CheatSpellSearch(foundSpells, startingPointInitial, currentPage, typeCode)
+        endIf
+    endIf
+EndFunction
+
+
+
+
+Function Proteus_CheatPerk(int startingPoint, int currentPage, int typeCode) ;option 0 = cheat, 1 = reset
+    Debug.Notification("Perk menu loading...may take a few seconds!")
+    Form[] allGamePerks = GetAllForms(typeCode) ;get all Perks in game and from mods
+
+    int numPages = (allGamePerks.Length / 127) as Int
+    int startingPointInitial = startingPoint
+
+    UIListMenu listMenuBase = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+    if listMenuBase 
+        int i = 0
+        listMenuBase.AddEntryItem("[Done Adding Perks]")
+        i+=1
+        listMenuBase.AddEntryItem("[Search Perks]")
+        i+=1
+        while startingPoint <= allGamePerks.Length && i < 128
+			String name = GetFormEditorID(allGamePerks[startingPoint])
+			if(name == "")
+				name = allGamePerks[startingPoint].GetName()
+			endif
+            listMenuBase.AddEntryItem(name)
+            i += 1
+            startingPoint += 1
+            if(i == 127)
+                listMenuBase.AddEntryItem("[Continue to Page " + Proteus_Round(currentPage + 1, 0) as String + " of " + Proteus_Round(numPages, 0) as String + "]")
+            endIf
+        endwhile
+    EndIf
+    listMenuBase.OpenMenu()
+    int result = listMenuBase.GetResultInt()
+    if result == 1 ;search option
+        String searchTerm = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Search for:")
+        Utility.Wait(0.1)
+        Int lengthSearchTerm = StringUtil.GetLength(searchTerm)
+        if (lengthSearchTerm > 0)   
+            int PerkCount = ProteusDLLUtils.ProteusGetItemCount(searchTerm, typeCode)
+            Form[] foundPerks = ProteusDLLUtils.ProteusGetItemBySearch(searchTerm, typeCode)
+            Proteus_CheatPerkSearch(foundPerks, 0, 1, typeCode)
+        else
+            Debug.Notification("Invalid length search term.")
+        endIf
+
+    elseif result == 127 ;next page option
+        currentPage += 1
+        Proteus_CheatPerk(startingPoint, currentPage, typeCode)
+    elseif(result > 0 && result != 127)
+        if(startingPoint > 127)
+            Form selectedPerk = allGamePerks[startingPointInitial + result - 2]
+            npcTarget.AddPerk(selectedPerk as Perk)
+			Debug.Notification(selectedPerk.getName() + " added.")
+            Proteus_CheatPerk(startingPointInitial, currentPage, typeCode)
+        Else
+            Form selectedPerk = allGamePerks[result - 2]
+            npcTarget.AddPerk(selectedPerk as Perk)
+			Debug.Notification(selectedPerk.getName() + " added.")
+            Proteus_CheatPerk(startingPointInitial, currentPage, typeCode)
+        endIf
+    endIf
+EndFunction
+
+Function Proteus_CheatPerkSearch(Form[] foundPerks, int startingPoint, int currentPage, int typeCode) ;option 0 = cheat, 1 = reset
+    Debug.Notification("Perk menu loading...may take a few seconds!")
+    Form[] allGamePerks = foundPerks ;get all Perks in game and from mods
+
+    int numPages = (allGamePerks.Length / 127) as Int
+    int startingPointInitial = startingPoint
+
+    UIListMenu listMenuBase = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+    if listMenuBase 
+        int i = 0
+        listMenuBase.AddEntryItem("[Done Adding Perks]")
+        i+=1
+        listMenuBase.AddEntryItem("[Search Perks]")
+        i+=1
+        while startingPoint <= allGamePerks.Length && i < 128
+			String name = GetFormEditorID(allGamePerks[startingPoint])
+			if(name == "")
+				name = allGamePerks[startingPoint].GetName()
+			endif
+            listMenuBase.AddEntryItem(name)
+            i += 1
+            startingPoint += 1
+            if(i == 127)
+                listMenuBase.AddEntryItem("[Continue to Page " + Proteus_Round(currentPage + 1, 0) as String + " of " + Proteus_Round(numPages, 0) as String + "]")
+            endIf
+        endwhile
+    EndIf
+    listMenuBase.OpenMenu()
+    int result = listMenuBase.GetResultInt()
+    if result == 1 ;search option
+        String searchTerm = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Search for:")
+        Utility.Wait(0.1)
+        Int lengthSearchTerm = StringUtil.GetLength(searchTerm)
+        if (lengthSearchTerm > 0)   
+            int PerkCount = ProteusDLLUtils.ProteusGetItemCount(searchTerm, typeCode)
+            Form[] foundPerks2 = ProteusDLLUtils.ProteusGetItemBySearch(searchTerm, typeCode)
+            Proteus_CheatPerkSearch(foundPerks2, 0, 1, typeCode)
+        else
+            Debug.Notification("Invalid length search term.")
+        endIf
+    elseif result == 127 ;next page option
+        currentPage += 1
+        Proteus_CheatPerkSearch(foundPerks, startingPoint, currentPage, typeCode)
+    elseif(result > 0 && result != 127)
+        if(startingPoint > 127)
+            Form selectedPerk = allGamePerks[startingPointInitial + result - 2]
+            npcTarget.AddPerk(selectedPerk as Perk)
+			Debug.Notification(selectedPerk.getName() + " added.")
+            Proteus_CheatPerkSearch(foundPerks, startingPointInitial, currentPage, typeCode)
+        Else
+            Form selectedPerk = foundPerks[result - 2]
+            npcTarget.AddPerk(selectedPerk as Perk)
+			Debug.Notification(selectedPerk.getName() + " added.")
+            Proteus_CheatPerkSearch(foundPerks, startingPointInitial, currentPage, typeCode)
+        endIf
+    endIf
+EndFunction

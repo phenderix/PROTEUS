@@ -261,6 +261,7 @@ Bool mysticiscmActive ;Mysticism - A Magic Overhaul
 Bool edmActive ;Elemental Destruction Magic
 Bool edmrActive ;Elemental Destruction Magic Redux
 Bool addItemsActive ;AddItemMenu - Ultimate Mod Explorer
+Bool colorfulMagicActive ;Colorful Magic by 184Gesu SE
 Bool vokriinatorActive ;Vokriinator Black
 
 
@@ -276,7 +277,7 @@ function OnInit()
 endFunction
 
 function OnUpdate()
-	RegisterForSingleUpdate(0.25)
+	RegisterForSingleUpdate(0.2)
 	if input.GetNumKeysPressed() > 0 
 		keyMapCasting()
 	endIf
@@ -522,7 +523,7 @@ function Proteus_PlayerMainMenu()
 		endIf
 		Proteus_LockDisable()
 	elseIf result == 11 ;racemenu enhanced
-		ExecuteCommand("showracemenu")
+		;ExecuteCommand("showracemenu")
 		Utility.Wait(0.5)
 		String presetName = player.GetActorBase().GetName()
 		Int lengthPresetName = StringUtil.GetLength(presetName as String)
@@ -752,6 +753,7 @@ Function Proteus_CheckActiveMods()
 	shadowspellsActive = false
 	acebloodActive = false
 	mysticiscmActive = false
+	colorfulMagicActive = false
 	addItemsActive = false
 	vokriinatorActive = false
 
@@ -930,6 +932,16 @@ Function Proteus_CheckActiveMods()
 			mysticiscmActive = true
 		else
 			Debug.Notification("Proteus Mysticism patch not installed. Please install it!")
+		EndIf
+	endIf
+
+	targetModIndex = Game.GetModByName("Colorful_Magic_SE.esp")
+	if TargetModIndex != 255
+		targetModIndex = Game.GetModByName("Proteus - Colorful Magic Patch.esp")
+		if TargetModIndex != 255
+			colorfulMagicActive = true
+		else
+			Debug.Notification("Proteus Colorful Magic patch not installed. Please install it!")
 		EndIf
 	endIf
 
@@ -1448,9 +1460,6 @@ function Proteus_LoadCharacterSpawn(Actor target, String presetKnownName)
 			if(fileExistsAtPath(JContGlobalPath + "/Proteus/Proteus_Character_Race_" + presetName + ".json"))
 		
 				Race presetRace = Proteus_LoadCharacterRace(presetName)
-				if (presetKnownName == "") ;get gender right before selecting which actor to spawn
-					Proteus_LoadTargetStrings(presetName, target, 0) 
-				endIf
 
 				if(presetKnownName == "evilproteusspawn")
 					target = hostilePlayerCharacter
@@ -1876,9 +1885,6 @@ int Function Proteus_LoadSkillsAttributes(String presetName, Actor target, Int o
 					staminaLevel = value as Int
 				elseIf stat == "Level"
 					overallLevel = value as Int
-				elseIf stat == "Name"
-					target.SetName(value)
-					target.GetActorBase().SetName(value)
 				elseIf stat == "Experience"
 					overallExperience = value as Float
 				elseif stat == "AlchemyExp"
@@ -1966,11 +1972,10 @@ int Function Proteus_LoadSkillsAttributes(String presetName, Actor target, Int o
 			;change level and skills / new block added in 4.1.0 to make NPCs load stats correctly as when
 			;their level is updated, it resets all of their stats. Must load level first and then set skills / attributes
 			if(option == 0)
-				ExecuteCommand("player.setlevel " + overallLevel as Int)
+				ProteusDLLUtils.SetLevel(target, overallLevel as Int)
 				Game.SetPlayerExperience(overallExperience as Float)
 			elseif(option == 1)
-				SetSelectedReference(target)
-				ExecuteCommand("setlevel " + overallLevel as Int)
+				ProteusDLLUtils.SetLevel(target, overallLevel as Int)
 			EndIf
 			Target.SetActorValue("Alchemy", alchemyLevel as Int) 
 			Target.SetActorValue("Alteration", alterationLevel as Int) 
@@ -2401,41 +2406,7 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 
 	if option == 0
 		ProteusDLLUtils.RemoveAllSpells(target)
-		;Keyword[] kwd
-		;RemoveAddedSpells(target, "", kwd, false)
 	elseif option == 1
-
-		;actorbase spells (can't remove all spells)
-		ActorBase abTarget = target.GetActorBase()
-		int baseSpellCount = abTarget.GetSpellCount()
-		int i = 0
-		while (i < baseSpellCount)
-			Spell temp = abTarget.GetNthSpell(i)
-			if temp != NONE
-				target.RemoveSpell(temp)
-				i -= 1
-				baseSpellCount -= 1
-			endIf
-			i += 1
-		endwhile
-	
-		;race spells (can't remove all spells)
-		Race raceR = target.GetRace()
-		int raceSpellCount = raceR.GetSpellCount()
-		Form[] playerRaceSpells = Utility.CreateFormArray(raceSpellCount + 1)
-		i = 0
-		while (i < raceSpellCount)
-			Spell temp = raceR.GetNthSpell(i)
-			if temp != NONE
-				if (target.HasSpell(temp as Form) == true)
-					target.RemoveSpell(temp)
-					i -= 1
-					raceSpellCount -= 1
-				endIf
-			endIf
-			i += 1
-		endwhile
-
 		;remove vanilla spells
 		int k = 0
 		while k < ZZSpells.GetSize()
@@ -2444,64 +2415,39 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 		endWhile
 		
 		FormList ZZSpellList
-		FormList ZZSpellList2
-		FormList ZZSpellList3
 
 		;remove Phenderix Magic World Spells
 		if(pmwActive == true)
 			ZZSpellList = Game.GetFormFromFile(0x800, "Proteus - Phenderix Magic World Patch.esp") as FormList
-			ZZSpellList2 = Game.GetFormFromFile(0x801, "Proteus - Phenderix Magic World Patch.esp") as FormList
 			k = 0
 			while k < ZZSpellList.GetSize()
 				target.RemoveSpell(ZZSpellList.GetAt(k) as Spell)
 				k+=1
 			endWhile
-			k = 0
-			while k < ZZSpellList2.GetSize()
-				target.RemoveSpell(ZZSpellList2.GetAt(k) as Spell)
-				k+=1
-			endWhile
 		EndIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove Phenderix Magic Evolved Spells
 		if(pmwActive == true)
 			ZZSpellList = Game.GetFormFromFile(0x800, "Proteus - Phenderix Magic Evolved Patch.esp") as FormList
-			ZZSpellList2 = Game.GetFormFromFile(0x801, "Proteus - Phenderix Magic Evolved Patch.esp") as FormList
 			k = 0
 			while k < ZZSpellList.GetSize()
 				target.RemoveSpell(ZZSpellList.GetAt(k) as Spell)
-				k+=1
-			endWhile
-			k = 0
-			while k < ZZSpellList2.GetSize()
-				target.RemoveSpell(ZZSpellList2.GetAt(k) as Spell)
 				k+=1
 			endWhile
 		EndIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove Apocalypse Spells
 		if(apocalypseActive == true)
 			ZZSpellList = Game.GetFormFromFile(0x800, "Proteus - Apocalypse Patch.esp") as FormList
-			ZZSpellList2 = Game.GetFormFromFile(0x801, "Proteus - Apocalypse Patch.esp") as FormList
-
 			k = 0
 			while k < ZZSpellList.GetSize()
 				target.RemoveSpell(ZZSpellList.GetAt(k) as Spell)
 				k+=1
 			endWhile
-
-			k = 0
-			while k < ZZSpellList2.GetSize()
-				target.RemoveSpell(ZZSpellList2.GetAt(k) as Spell)
-				k+=1
-			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove EDMR spells
 		if(edmrActive == true)
@@ -2513,7 +2459,6 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove Triumvirate spells
 		if(triumActive == true)
@@ -2525,7 +2470,6 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove Odin spells
 		if(odinActive == true)
@@ -2537,7 +2481,6 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove Imperious spells
 		if(imperiousActive == true)
@@ -2549,7 +2492,6 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove Aetherius spells
 		if(aethActive == true)
@@ -2561,7 +2503,6 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove Morningstar spells
 		if(morningstarActive == true)
@@ -2573,7 +2514,6 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove Better Vampire spells
 		if(betterVampiresActive == true)
@@ -2585,7 +2525,6 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove Bloodlines spells
 		if(bloodlinesActive == true)
@@ -2597,7 +2536,6 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove Bloodmoon Rising spells
 		if(bloodmoonRisingActive == true)
@@ -2609,7 +2547,6 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove Curse of the Vampire spells
 		if(curseVampireActive == true)
@@ -2621,7 +2558,6 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove Manbeast spells
 		if(manbeastActive == true)
@@ -2633,7 +2569,6 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove Lupine spells
 		if(lupineActive == true)
@@ -2645,7 +2580,6 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove Moonlight Tales spells
 		if(moonlightTalesActive == true)
@@ -2657,7 +2591,6 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove Growl spells
 		if(growlActive == true)
@@ -2669,7 +2602,6 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove Sacrilege spells
 		if(sacrilegeActive == true)
@@ -2681,7 +2613,6 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove Sacrosanct spells
 		if(sacrosanctActive == true)
@@ -2693,7 +2624,6 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove Sanguinaire spells
 		if(sanguinaireActive == true)
@@ -2705,7 +2635,6 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove Scion spells
 		if(scionActive == true)
@@ -2717,7 +2646,6 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove Vampyrium spells
 		if(vampyriumActive == true)
@@ -2729,7 +2657,6 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove Trua spells
 		if(truaActive == true)
@@ -2741,7 +2668,6 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove Wintersun spells
 		if(wintersunActive == true)
@@ -2753,7 +2679,6 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove Pilgrim spells
 		if(pilgrimActive == true)
@@ -2765,7 +2690,6 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove Shadow Spell Package spells
 		if(shadowspellsActive == true)
@@ -2777,7 +2701,6 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove Ace Blood Magic spells
 		if(acebloodActive == true)
@@ -2789,7 +2712,6 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove Mysticism spells
 		if(mysticiscmActive == true)
@@ -2799,24 +2721,8 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 				target.RemoveSpell(ZZSpellList.GetAt(k) as Spell)
 				k+=1
 			endWhile
-
-			ZZSpellList = Game.GetFormFromFile(0x801, "Proteus - Mysticism Patch.esp") as FormList
-			k = 0
-			while k < ZZSpellList.GetSize()
-				target.RemoveSpell(ZZSpellList.GetAt(k) as Spell)
-				k+=1
-			endWhile
-
-			ZZSpellList = Game.GetFormFromFile(0x802, "Proteus - Mysticism Patch.esp") as FormList
-			k = 0
-			while k < ZZSpellList.GetSize()
-				target.RemoveSpell(ZZSpellList.GetAt(k) as Spell)
-				k+=1
-			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
-		ZZSpellList3 = NONE
 
 		;remove Arcanum spells
 		if(arcanumActive == true)
@@ -2826,16 +2732,8 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 				target.RemoveSpell(ZZSpellList.GetAt(k) as Spell)
 				k+=1
 			endWhile
-
-			ZZSpellList = Game.GetFormFromFile(0x801, "Proteus - Arcanum Patch.esp") as FormList
-			k = 0
-			while k < ZZSpellList.GetSize()
-				target.RemoveSpell(ZZSpellList.GetAt(k) as Spell)
-				k+=1
-			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
 
 		;remove EDM spells
 		if(edmActive == true)
@@ -2847,7 +2745,17 @@ function Proteus_RemoveSpells(Actor target, int option) ;option 0 = switch chara
 			endWhile
 		endIf
 		ZZSpellList = NONE
-		ZZSpellList2 = NONE
+
+		;remove colorful magic spells
+		if(colorfulMagicActive == true)
+			ZZSpellList = Game.GetFormFromFile(0x901, "Proteus - Colorful Magic Patch.esp") as FormList
+			k = 0
+			while k < ZZSpellList.GetSize()
+				target.RemoveSpell(ZZSpellList.GetAt(k) as Spell)
+				k+=1
+			endWhile
+		endIf
+		ZZSpellList = NONE
 	endIf
 endFunction
 
@@ -3031,52 +2939,40 @@ endFunction
 
 
 
-;postTargetAcquire (0 = spawned character, 1 = load appearance preset, 2 = swap characters)
-function Proteus_LoadTargetStrings(String presetName, Actor target, int postTargetAcquire)
+;option (1 = load appearance preset, 2 = siwtch / spawn characters)
+function Proteus_LoadTargetStrings(String presetName, Actor target, int option)
 	if(fileExistsAtPath(JContGlobalPath + "/Proteus/Proteus_Character_GeneralInfo_" + presetName + ".json"))
 		Int JStringList = jvalue.readFromFile(JContGlobalPath + "/Proteus/Proteus_Character_GeneralInfo_" + presetName + ".json")
 		Int maxCount = jvalue.Count(JStringList )
-
 		Int jStats = jmap.object()
 		Int i = 0
 		String text = jmap.nextKey(JStringList, "", "")
 		String value
-
 		while i < maxCount
 			value = jmap.GetStr(JStringList, text, "")
 			if text == "name"
-				;set target name to other character name
-				if(postTargetAcquire == 2)
+				if(option == 2)  ;set target name to other character name
 					target.SetName(value)
 					target.GetActorBase().SetName(value)
 				endIf
 			elseif text == "gender"
-				if(value == 0)
-					spawnedCharacterGender = "male"
-				Elseif (value == 1)
-					spawnedCharacterGender = "female"
-				endIf
-
-				if(postTargetAcquire == 2 || postTargetAcquire == 1)
-					if((target.GetActorBase()).GetSex() == 0 && value == 0)
-					elseif((target.GetActorBase()).GetSex() == 1 && value == 1)
-					else
-						SetSelectedReference(target)
-						ExecuteCommand("sexchange")
-					EndIf
+				if(value == 0) ;male
+					Debug.MessageBox("Change to Male")
+					SetSex(target, 0) 
+				Elseif (value == 1) ;female
+					Debug.MessageBox("Change to Female")
+					SetSex(target, 1) 
 				endIf
 			elseif text == "race"
 			elseif text == "CarryWeight"
-				if(postTargetAcquire == 2)
+				if(option == 2)
 					targetCW = value as Float
 				endIf
 			EndIf
 			text = jmap.nextKey(JStringList, text, "")
 			i += 1
 		endWhile
-		;debug.Notification("Name loaded from the Proteus system.")
 	else
-		;debug.Notification("Name not found in Proteus system.")
 	EndIf
 endFunction
 
@@ -3443,11 +3339,24 @@ function Proteus_RemovePerks_SlowCheckingProcess(Actor target, int option)
 		endWhile
 	endIf
 	;check for Project Proteus patch for the mod "Elemental Destruction Magic"
-	if arcanumActive == true
+	if edmActive == true
 		FormList EDMPerks = Game.GetFormFromFile(0x801, "Proteus - EDM Patch.esp") As FormList
 		i = 0
 		while i < EDMPerks.GetSize()
 			Perk pPerk = EDMPerks.GetAt(i) as Perk
+			if player.HasPerk(pPerk) == TRUE
+				allGamePerks[perkCountTracker] = pPerk
+				perkCountTracker += 1
+			endIf
+			i+=1
+		endWhile
+	endIf
+	;check for Project Proteus patch for the mod "Colorful Magic"
+	if colorfulMagicActive == true
+		FormList colorfulMagicPerks = Game.GetFormFromFile(0x900, "Proteus - Colorful Magic Patch.esp") As FormList
+		i = 0
+		while i < colorfulMagicPerks.GetSize()
+			Perk pPerk = colorfulMagicPerks.GetAt(i) as Perk
 			if player.HasPerk(pPerk) == TRUE
 				allGamePerks[perkCountTracker] = pPerk
 				perkCountTracker += 1
@@ -4775,9 +4684,7 @@ function Proteus_PlayerPiecemealLoadFunction(Actor target)
 			Race currentRace = player.GetRace()	
 			Race presetRace = player.GetRace()
 			Proteus_LoadTargetStrings(presetName, player, 1) ;change gender if needed
-			if(fileExistsAtPath(JContGlobalPath + "/Proteus/Proteus_Character_Race_" + presetName + ".json"))
-				presetRace = Proteus_LoadCharacterRace(presetName)
-			endIf
+			presetRace = Proteus_LoadCharacterRace(presetName)
 			if(explosionsOn.GetValue() == 1)
 				player.PlaceAtMe(greenExplosion, 1)
 			endIf
@@ -4805,9 +4712,7 @@ function Proteus_PlayerPiecemealLoadFunction(Actor target)
 			Race currentRace = player.GetRace()	
 			Race presetRace = player.GetRace()
 			Proteus_LoadTargetStrings(presetName, player, 1) ;change gender if needed
-			if(fileExistsAtPath(JContGlobalPath + "/Proteus/Proteus_Character_Race_" + presetName + ".json"))
-				presetRace = Proteus_LoadCharacterRace(presetName)
-			endIf
+			presetRace = Proteus_LoadCharacterRace(presetName)
 			if(explosionsOn.GetValue() == 1)
 				player.PlaceAtMe(greenExplosion, 1)
 			endIf
@@ -4947,6 +4852,9 @@ Function Proteus_SwitchCharacter()
 					Utility.Wait(0.1)
 					Proteus_LoadCharacterSpawn(target, playerPresetName)
 					Utility.Wait(0.1)
+
+					ColorForm colorHair = player.GetActorBase().GetHairColor()
+					LoadCharacterPreset(player, targetPresetName, colorHair)
 
 					target.DispelAllSpells()
 
@@ -5938,10 +5846,8 @@ Function LevelScaler(Actor target)
     if ran == true
         int levelDiff = levelPreset - target.GetLevel()
 		Utility.Wait(0.1)
-		SetSelectedReference(target)
-
         if(levelDiff > 0)
-			ExecuteCommand("setlevel " + levelPreset)
+			ProteusDLLUtils.SetLevel(target, levelPreset)
             skillCurrentTotal += target.GetBaseAV("Alchemy") as Int
             skillCurrentTotal += target.GetBaseAV("Alteration") as Int
             skillCurrentTotal += target.GetBaseAV("Marksman") as Int
@@ -6308,7 +6214,7 @@ Function Proteus_NewCharacter()
 	player.SetActorValue("Magicka", 100) 
 	player.SetActorValue("Stamina", 100) 
 	player.SetActorValue("CarryWeight", 300)
-	ExecuteCommand("player.setlevel 1")
+	ProteusDLLUtils.SetLevel(player, 1)
 	Game.SetPlayerExperience(0)
 	ActorValueInfo.GetActorValueInfoByName("Alchemy").SetSkillExperience(0)
 	ActorValueInfo.GetActorValueInfoByName("Alteration").SetSkillExperience(0)
@@ -6353,7 +6259,7 @@ Function Proteus_NewCharacter()
 
 	;dispel spells, add back important mod items, and edit appearance
 	player.DispelAllSpells()
-	ExecuteCommand("showracemenu")
+	;ExecuteCommand("showracemenu")
 	Utility.Wait(0.1)
 	Proteus_AddBackModItems()
 	Utility.Wait(0.1)
@@ -6741,7 +6647,11 @@ Function Proteus_CheatItem(int startingPoint, int currentPage, int typeCode) ;op
         listMenuBase.AddEntryItem("[Search " + typeString + "]")
         i+=1
         while startingPoint <= allGameItems.Length && i < 128
-            listMenuBase.AddEntryItem(GetFormEditorID(allGameItems[startingPoint]))
+			String name = GetFormEditorID(allGameItems[startingPoint])
+			if(name == "")
+				name = allGameItems[startingPoint].GetName()
+			endif
+            listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
             if(i == 127)
@@ -6831,7 +6741,11 @@ Function Proteus_CheatItemSearch(Form[] foundItems, int startingPoint, int curre
         listMenuBase.AddEntryItem("[Search " + typeString + "]")
         i+=1
         while startingPoint <= allGameItems.Length && i < 128
-            listMenuBase.AddEntryItem(GetFormEditorID(allGameItems[startingPoint]))
+			String name = GetFormEditorID(allGameItems[startingPoint])
+			if(name == "")
+				name = allGameItems[startingPoint].GetName()
+			endif
+            listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
             if(i == 127)
@@ -6912,7 +6826,11 @@ Function Proteus_CheatSpell(int startingPoint, int currentPage, int typeCode) ;o
         listMenuBase.AddEntryItem("[Search Spells]")
         i+=1
         while startingPoint <= allGameSpells.Length && i < 128
-            listMenuBase.AddEntryItem(GetFormEditorID(allGameSpells[startingPoint]))
+			String name = GetFormEditorID(allGameSpells[startingPoint])
+			if(name == "")
+				name = allGameSpells[startingPoint].GetName()
+			endif
+            listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
             if(i == 127)
@@ -6965,7 +6883,11 @@ Function Proteus_CheatSpellSearch(Form[] foundSpells, int startingPoint, int cur
         listMenuBase.AddEntryItem("[Search Spells]")
         i+=1
         while startingPoint <= allGameSpells.Length && i < 128
-            listMenuBase.AddEntryItem(GetFormEditorID(allGameSpells[startingPoint]))
+			String name = GetFormEditorID(allGameSpells[startingPoint])
+			if(name == "")
+				name = allGameSpells[startingPoint].GetName()
+			endif
+            listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
             if(i == 127)
@@ -7020,7 +6942,11 @@ Function Proteus_CheatPerk(int startingPoint, int currentPage, int typeCode) ;op
         listMenuBase.AddEntryItem("[Search Perks]")
         i+=1
         while startingPoint <= allGamePerks.Length && i < 128
-            listMenuBase.AddEntryItem(GetFormEditorID(allGamePerks[startingPoint]))
+			String name = GetFormEditorID(allGamePerks[startingPoint])
+			if(name == "")
+				name = allGamePerks[startingPoint].GetName()
+			endif
+            listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
             if(i == 127)
@@ -7075,7 +7001,11 @@ Function Proteus_CheatPerkSearch(Form[] foundPerks, int startingPoint, int curre
         listMenuBase.AddEntryItem("[Search Perks]")
         i+=1
         while startingPoint <= allGamePerks.Length && i < 128
-            listMenuBase.AddEntryItem(GetFormEditorID(allGamePerks[startingPoint]))
+			String name = GetFormEditorID(allGamePerks[startingPoint])
+			if(name == "")
+				name = allGamePerks[startingPoint].GetName()
+			endif
+            listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
             if(i == 127)
@@ -7132,7 +7062,11 @@ Function Proteus_CheatShout(int startingPoint, int currentPage, int typeCode) ;o
         listMenuBase.AddEntryItem("[Search Shouts]")
         i+=1
         while startingPoint <= allGameShouts.Length && i < 128
-            listMenuBase.AddEntryItem(GetFormEditorID(allGameShouts[startingPoint]))
+			String name = GetFormEditorID(allGameShouts[startingPoint])
+			if(name == "")
+				name = allGameShouts[startingPoint].GetName()
+			endif
+            listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
             if(i == 127)
@@ -7199,6 +7133,10 @@ Function Proteus_CheatShoutSearch(Form[] foundShouts, int startingPoint, int cur
         listMenuBase.AddEntryItem("[Search Shouts]")
         i+=1
         while startingPoint <= allGameShouts.Length && i < 128
+			String name = GetFormEditorID(allGameShouts[startingPoint])
+			if(name == "")
+				name = allGameShouts[startingPoint].GetName()
+			endif
             listMenuBase.AddEntryItem(GetFormEditorID(allGameShouts[startingPoint]))
             i += 1
             startingPoint += 1
