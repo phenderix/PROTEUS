@@ -197,6 +197,7 @@ Bool playerPresetFirstLoad
 ObjectReference tempMarker
 String JContGlobalPath
 Float targetCW
+ColorForm playerHairColor
 
 ;Variables (tracking active mods)
 Bool obisActive ;OBIS Bandits
@@ -253,6 +254,7 @@ function OnEffectStart(Actor akplayer, Actor akCaster)
 
 	Proteus_CheckActiveMods()
 	player = akplayer
+	playerHairColor = player.GetActorBase().GetHairColor()
 	Proteus_PlayerMainMenu()
 endFunction
 
@@ -2700,22 +2702,20 @@ endFunction
 Function Proteus_LoadCharacterAppearance(String presetName, Actor target, Race currentRace, Race presetRace, int option)
 	if(option == 0) ;for player
 		if(presetRace == currentRace)
-			ColorForm colorHair = target.GetActorBase().GetHairColor()
-			LoadCharacterPreset(target, presetName, colorHair)	
+			LoadCharacterPreset(target, presetName, playerHairColor)	
 			LoadCharacter(target, presetRace, presetName)
 			;LoadExternalCharacter(target, presetRace, presetName)
 		else
 			target.SetRace(presetRace)
 			Utility.Wait(0.1)
-			ColorForm colorHair = target.GetActorBase().GetHairColor()
-			LoadCharacterPreset(target, presetName, colorHair)	
+			LoadCharacterPreset(target, presetName, playerHairColor)	
 			LoadCharacter(target, presetRace, presetName)
 			Utility.Wait(0.1)	
 			target.SetRace(currentRace)
 			Utility.Wait(0.1)
 			target.SetRace(presetRace)
 			Utility.Wait(0.1)
-			LoadCharacterPreset(target, presetName, colorHair)	
+			LoadCharacterPreset(target, presetName, playerHairColor)	
 			LoadCharacter(target, presetRace, presetName)
 			;LoadExternalCharacter(target, presetRace, presetName)
 		endIf
@@ -2765,6 +2765,8 @@ function Proteus_SaveTargetStrings(Actor targetBackup, String presetName)
 			value = targetBackup.GetRace().GetName() as String
 		elseif j == 3
 			value = targetBackup.GetBaseAV("CarryWeight") as String
+		elseif j == 4
+			value = player.GetActorBase().GetHairColor().GetColor() as String
 		EndIf
 		j += 1
 		jmap.SetStr(jNText, text, value)
@@ -2793,10 +2795,10 @@ function Proteus_LoadTargetStrings(String presetName, Actor target, int option)
 				endIf
 			elseif text == "gender"
 				if(value == 0) ;male
-					Debug.MessageBox("Change to Male")
+					;Debug.MessageBox("Change to Male")
 					SetSex(target, 0) 
 				Elseif (value == 1) ;female
-					Debug.MessageBox("Change to Female")
+					;Debug.MessageBox("Change to Female")
 					SetSex(target, 1) 
 				endIf
 			elseif text == "race"
@@ -2804,6 +2806,9 @@ function Proteus_LoadTargetStrings(String presetName, Actor target, int option)
 				if(option == 2)
 					targetCW = value as Float
 				endIf
+			elseif text == "hairColor"
+				Int playerHairColorInt = value as Int
+				playerHairColor.SetColor(playerHairColorInt)
 			EndIf
 			text = jmap.nextKey(JStringList, text, "")
 			i += 1
@@ -4689,8 +4694,7 @@ Function Proteus_SwitchCharacter()
 					Proteus_LoadCharacterSpawn(target, playerPresetName)
 					Utility.Wait(0.1)
 
-					ColorForm colorHair = player.GetActorBase().GetHairColor()
-					LoadCharacterPreset(player, targetPresetName, colorHair)
+					LoadCharacterPreset(player, targetPresetName, playerHairColor)
 
 					target.DispelAllSpells()
 
