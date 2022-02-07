@@ -4784,6 +4784,9 @@ Function Proteus_SwitchCharacter()
 					Proteus_LoadCharacterSpawn(target, playerPresetName)
 					Utility.Wait(0.1)
 
+					ColorForm colorHair = player.GetActorBase().GetHairColor()
+					LoadCharacterPreset(player, targetPresetName, colorHair)
+
 					target.DispelAllSpells()
 
 					;clear notifications
