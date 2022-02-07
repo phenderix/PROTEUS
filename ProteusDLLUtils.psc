@@ -36,6 +36,10 @@ int Function RemovePerksForTree(Actor a_reference, String skill) Global Native
 ; @return Returns 0 if there is an error.
 int Function RemovePerksForAllTrees(Actor a_reference) Global Native
 
+; @brief Returns if a spell is favorited
+; @return Returns 0 if there is an error.
+bool Function IsFavoritedSpell(Spell spell) global native
+
 ; @brief Returns an array of all spells known by the user.
 ; @return Returns 0 if there is an error.
 Spell[] Function GetAllSpells(Actor actor) global native
