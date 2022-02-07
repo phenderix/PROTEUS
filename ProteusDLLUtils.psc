@@ -79,3 +79,7 @@ Int Function SetSex(Actor actor, Int sex) Global Native
 ; @brief Sets the level onto the actor
 ; @return Returns 0 if there is an error.
 Int Function SetLevel(Actor actor, Int level) Global Native 
+
+; @brief Shows the racemenu
+; @return Returns 0 if there is an error.
+Int Function ShowRaceMenu() Global Native 
