@@ -1,0 +1,7 @@
+Scriptname ProteusNameFunctions 
+
+import PO3_SKSEFunctions
+import PhenderixToolResourceScript
+import CharGen
+import JContainers
+import ProteusDLLUtils
