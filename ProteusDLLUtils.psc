@@ -71,3 +71,11 @@ Form[] Function ProteusGetItemEditorIdBySearch(String containsText, Int formType
 ; @brief Returns all the items from a form type with a cache.
 ; @return Returns 0 if there is an error.
 Form[] Function ProteusGetAllByFormId(Int formType) Global Native 
+
+; @brief Sets the sex onto the target actor. 1 == female. 0 == male Checks if it is already the sex before setting it. Does nothing if its the same sex.
+; @return Returns 0 if there is an error.
+Int Function SetSex(Actor actor, Int sex) Global Native 
+
+; @brief Sets the level onto the actor
+; @return Returns 0 if there is an error.
+Int Function SetLevel(Actor actor, Int level) Global Native 
