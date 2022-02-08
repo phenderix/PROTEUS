@@ -1,11 +1,11 @@
 scriptName PhenderixToolEditNPCScript extends activemagiceffect
 
-import PO3_SKSEFunctions
 import PhenderixToolResourceScript
 import CharGen
 import JContainers
 Import ConsoleUtil
 Import ProteusCheatFunctions
+Import ProteusDLLUtils
 
 ;-- Properties --------------------------------------
 spell property NPCControlSpell auto
@@ -311,7 +311,7 @@ Function Proteus_NPCVoiceType(Actor gTarget, int startingPoint)
 		listMenuBase.AddEntryItem("[Complete List]")
 		i+=1
 		while (i - 2) < ZZVoiceTypes.GetSize()
-			listMenuBase.AddEntryItem(GetFormEditorID(ZZVoiceTypes.GetAt(i - 2)))
+			listMenuBase.AddEntryItem(ProteusGetFormEditorID(ZZVoiceTypes.GetAt(i - 2)))
 			i += 1
 		endwhile
 	EndIf
@@ -1769,7 +1769,7 @@ Function Proteus_CopyNPCAppearance(Actor gTarget)
 		playerBase.SetSkinFar(targetBase.GetSkinFar())
 
 		;hair color
-		playerBase.SetHairColor(targetBase.GetHairColor())
+		playerBase.SetHairColor(targetBase.GetHairColor()) 
 		rcMenu.SaveHair()
 		Utility.Wait(0.1)
 		player.QueueNiNodeUpdate()
@@ -1843,12 +1843,12 @@ Function Proteus_NPCChangeHairColor(Actor gTarget)
 	listMenuHair.OpenMenu()
 	int result = listMenuHair.GetResultInt()
 
-	if result > 0 && result <= 130
+	if result > 0 && result <= 130 
 		int numR = result - 1
 		ColorForm hairColorT = hairColorList.GetAt(numR) as ColorForm
-		SetHairColor(gTarget, hairColorT)
+		ProteusSetHairColor(gTarget, hairColorT)
 		gTarget.QueueNiNodeUpdate()
-		SetHairColor(gTarget, hairColorT)
+		ProteusSetHairColor(gTarget, hairColorT)
 		;Debug.MessageBox("ColorName:" + (hairColorList.GetAt(numR) as ColorForm).GetName())
 	else
 	endIf
@@ -2253,7 +2253,7 @@ function Proteus_ClearNPCEdits(Actor targetName)
 	ClearPreset(targetName.GetActorBase())
 	DeleteFaceGenData(targetName.GetActorBase())
 
-	if IsFormInMod(targetName, "PROTEUS.esp") == true
+	if ProteusIsFormInMod(targetName, "PROTEUS.esp") == true
 		targetName.GetActorBase().SetName("Unused Slot")
 		targetName.MoveTo(voidMarker)
 	endIf
@@ -3100,7 +3100,7 @@ endFunction
 
 Function Proteus_CheatOutfit(Actor target, int startingPoint, int currentPage) ;option 0 = cheat, 1 = reset
     Debug.Notification("Outfit menu loading...may take a few seconds!")
-    Form[] allGameOutfits = GetAllForms(124) ;get all Outfits in game and from mods
+    Form[] allGameOutfits = ProteusGetAllByFormId(124) ;get all Outfits in game and from mods
 
     int numPages = (allGameOutfits.Length / 127) as Int
     int startingPointInitial = startingPoint
@@ -3113,7 +3113,14 @@ Function Proteus_CheatOutfit(Actor target, int startingPoint, int currentPage) ;
         listMenuBase.AddEntryItem("[Search Outfits]")
         i+=1
         while startingPoint <= allGameOutfits.Length && i < 128
-            listMenuBase.AddEntryItem(GetFormEditorID(allGameOutfits[startingPoint]))
+			String name = ProteusGetFormEditorID(allGameOutfits[startingPoint])
+			if(name == "")
+				name = allGameOutfits[startingPoint].GetName()
+			endif 
+			if(name == "")
+				name = "(Missing Name)"
+			endif
+            listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
             if(i == 127)
@@ -3164,7 +3171,14 @@ Function Proteus_CheatOutfitSearch(Actor target, Form[] foundItems, int starting
         listMenuBase.AddEntryItem("[Search Outfits]")
         i+=1
         while startingPoint <= allGameOutfits.Length && i < 128
-            listMenuBase.AddEntryItem(GetFormEditorID(allGameOutfits[startingPoint]))
+			String name = ProteusGetFormEditorID(allGameOutfits[startingPoint])
+			if(name == "")
+				name = allGameOutfits[startingPoint].GetName()
+			endif 
+			if(name == "")
+				name = "(Missing Name)"
+			endif
+            listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
             if(i == 127)
@@ -3205,7 +3219,7 @@ EndFunction
 ;updated in 5.2.0
 Function Proteus_NPCVoiceTypeExhaustive(Actor target, int startingPoint, int currentPage)
     Debug.Notification("Voice Type menu loading...may take a few seconds!")
-    Form[] allGameVT = GetAllForms(98) ;get all Outfits in game and from mods
+    Form[] allGameVT = ProteusGetAllByFormId(98) ;get all Outfits in game and from mods 
 
     int numPages = (allGameVT.Length / 127) as Int
     int startingPointInitial = startingPoint
@@ -3218,7 +3232,7 @@ Function Proteus_NPCVoiceTypeExhaustive(Actor target, int startingPoint, int cur
         listMenuBase.AddEntryItem("[Search VT]")
         i+=1
         while startingPoint <= allGameVT.Length && i < 128
-            listMenuBase.AddEntryItem(GetFormEditorID(allGameVT[startingPoint]))
+            listMenuBase.AddEntryItem(ProteusGetFormEditorID(allGameVT[startingPoint]))
             i += 1
             startingPoint += 1
             if(i == 127)
@@ -3276,7 +3290,14 @@ Function Proteus_NPCVoiceTypeExhaustiveSearch(Actor target, Form[] foundItems, i
         listMenuBase.AddEntryItem("[Search VT]")
         i+=1
         while startingPoint <= allGameVT.Length && i < 128
-            listMenuBase.AddEntryItem(GetFormEditorID(allGameVT[startingPoint]))
+			String name = ProteusGetFormEditorID(allGameVT[startingPoint])
+			if(name == "")
+				name = allGameVT[startingPoint].GetName()
+			endif 
+			if(name == "")
+				name = "(Missing Name)"
+			endif
+            listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
             if(i == 127)

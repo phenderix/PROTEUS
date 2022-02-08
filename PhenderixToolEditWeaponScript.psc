@@ -1,7 +1,6 @@
 
 scriptName PhenderixToolEditWeaponScript extends activemagiceffect
 
-import PO3_SKSEFunctions
 Import PhenderixToolResourceScript
 Import ObjectReference
 Import JContainers

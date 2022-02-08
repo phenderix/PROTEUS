@@ -1,8 +1,8 @@
 scriptName PhenderixToolEditArmorScript extends activemagiceffect
 
-import PO3_SKSEFunctions
 Import PhenderixToolResourceScript
 Import JContainers
+Import ProteusDLLUtils
 
 ;-- Properties --------------------------------------
 globalvariable property ZZProteusArmorTotalEdits auto
@@ -1502,27 +1502,27 @@ function Proteus_ArmorHeavyLightFunction(Armor item)
 	if ibutton4 == 0 ;set to light armor
 		item.SetWeightClass(0)
 		if(item.HasKeyword(HeavyArmorKWD) == TRUE)
-			ReplaceKeywordOnForm(item, lightArmorKWD, heavyArmorKWD)
+			ProteusReplaceKeywordOnForm(item, lightArmorKWD, heavyArmorKWD)
 		elseif(item.HasKeyword(lightArmorKWD) == FALSE)
-			AddKeywordToForm(item, lightArmorKWD)
+			ProteusAddKeywordToForm(item, lightArmorKWD)
 		endIf
 		Debug.Notification(item.GetName() + " converted to light armor.")
 		Proteus_EditArmorStatsFunction(item)
 	elseIf ibutton4 == 1 ;set to heavy armor
 		item.SetWeightClass(1)
 		if(item.HasKeyword(HeavyArmorKWD) == TRUE)
-			ReplaceKeywordOnForm(item, lightArmorKWD, heavyArmorKWD)
+			ProteusReplaceKeywordOnForm(item, lightArmorKWD, heavyArmorKWD)
 		elseif(item.HasKeyword(lightArmorKWD) == FALSE)
-			AddKeywordToForm(item, lightArmorKWD)
+			ProteusAddKeywordToForm(item, lightArmorKWD)
 		endIf
 		Debug.Notification(item.GetName() + " converted to heavy armor.")
 		Proteus_EditArmorStatsFunction(item)
 	elseIf ibutton4 == 2 ;set to neither light or heavy armor
 		if(item.HasKeyword(HeavyArmorKWD) == TRUE)
-			RemoveKeywordOnForm(item, HeavyArmorKWD)
+			ProteusRemoveKeywordOnForm(item, HeavyArmorKWD)
 		endIf
 		if(item.HasKeyword(LightArmorKWD) == TRUE)
-			RemoveKeywordOnForm(item, LightArmorKWD)
+			ProteusRemoveKeywordOnForm(item, LightArmorKWD)
 		endif
 		item.SetWeightClass(2)
 		Proteus_EditArmorStatsFunction(item)

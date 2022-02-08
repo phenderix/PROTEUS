@@ -1,8 +1,9 @@
 scriptName SIGEArmorLoadAliasScript extends ReferenceAlias
 
-import PO3_SKSEFunctions
 Import PhenderixToolResourceScript
 Import JContainers
+Import ProteusDLLUtils
+
 ;-- Properties --------------------------------------
 globalvariable property ZZProteusArmorTotalEdits auto
 Keyword property lightArmorKWD auto
@@ -68,24 +69,24 @@ function JLoadArmorSpecificSave()
 						elseIf stat == "Type"
 							if(value == "HeavyArmor")
 								if(armorTemp.HasKeyword(LightArmorKWD) == TRUE)
-									ReplaceKeywordOnForm(armorTemp, HeavyArmorKWD, LightArmorKWD)
+									ProteusReplaceKeywordOnForm(armorTemp, HeavyArmorKWD, LightArmorKWD)
 								elseif(armorTemp.HasKeyword(HeavyArmorKWD) == FALSE)
-									AddKeywordToForm(armorTemp, HeavyArmorKWD)
+									ProteusAddKeywordToForm(armorTemp, HeavyArmorKWD)
 								endIf
 								armorTemp.SetWeightClass(1)
 							elseif(value == "LightArmor")
 								if(armorTemp.HasKeyword(HeavyArmorKWD) == TRUE)
-									ReplaceKeywordOnForm(armorTemp, lightArmorKWD, heavyArmorKWD)
+									ProteusReplaceKeywordOnForm(armorTemp, lightArmorKWD, heavyArmorKWD)
 								elseif(armorTemp.HasKeyword(lightArmorKWD) == FALSE)
-									AddKeywordToForm(armorTemp, lightArmorKWD)
+									ProteusAddKeywordToForm(armorTemp, lightArmorKWD)
 								endIf
 								armorTemp.SetWeightClass(0)
 							elseif(value == "NoType")
 								if(armorTemp.HasKeyword(HeavyArmorKWD) == TRUE)
-									RemoveKeywordOnForm(armorTemp, HeavyArmorKWD)
+									ProteusRemoveKeywordOnForm(armorTemp, HeavyArmorKWD)
 								endIf
 								if(armorTemp.HasKeyword(LightArmorKWD) == TRUE)
-									RemoveKeywordOnForm(armorTemp, LightArmorKWD)
+									ProteusRemoveKeywordOnForm(armorTemp, LightArmorKWD)
 								endif
 								armorTemp.SetWeightClass(2)
 							endIf
@@ -148,24 +149,24 @@ function JLoadArmorAcrossAllSaves()
 						elseIf stat == "Type"
 							if(value == "HeavyArmor")
 								if(armorTemp.HasKeyword(LightArmorKWD) == TRUE)
-									ReplaceKeywordOnForm(armorTemp, HeavyArmorKWD, LightArmorKWD)
+									ProteusReplaceKeywordOnForm(armorTemp, HeavyArmorKWD, LightArmorKWD)
 								elseif(armorTemp.HasKeyword(HeavyArmorKWD) == FALSE)
-									AddKeywordToForm(armorTemp, HeavyArmorKWD)
+									ProteusAddKeywordToForm(armorTemp, HeavyArmorKWD)
 								endIf
 								armorTemp.SetWeightClass(1)
 							elseif(value == "LightArmor")
 								if(armorTemp.HasKeyword(HeavyArmorKWD) == TRUE)
-									ReplaceKeywordOnForm(armorTemp, lightArmorKWD, heavyArmorKWD)
+									ProteusReplaceKeywordOnForm(armorTemp, lightArmorKWD, heavyArmorKWD)
 								elseif(armorTemp.HasKeyword(lightArmorKWD) == FALSE)
-									AddKeywordToForm(armorTemp, lightArmorKWD)
+									ProteusAddKeywordToForm(armorTemp, lightArmorKWD)
 								endIf
 								armorTemp.SetWeightClass(0)
 							elseif(value == "NoType")
 								if(armorTemp.HasKeyword(HeavyArmorKWD) == TRUE)
-									RemoveKeywordOnForm(armorTemp, HeavyArmorKWD)
+									ProteusRemoveKeywordOnForm(armorTemp, HeavyArmorKWD)
 								endIf
 								if(armorTemp.HasKeyword(LightArmorKWD) == TRUE)
-									RemoveKeywordOnForm(armorTemp, LightArmorKWD)
+									ProteusRemoveKeywordOnForm(armorTemp, LightArmorKWD)
 								endif
 								armorTemp.SetWeightClass(2)
 							endIf

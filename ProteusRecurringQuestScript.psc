@@ -1,7 +1,6 @@
 Scriptname ProteusRecurringQuestScript extends ReferenceAlias
 
 Import ProteusDLLUtils
-import PO3_SKSEFunctions
 import CharGen
 import PhenderixToolResourceScript
 Import JContainers
@@ -1324,7 +1323,7 @@ function Proteus_RemoveFavorites(Actor target)
 	int favCount = 0
 	int p = 0
 	while p < favoritedSpells.Length
-		UnmarkItemAsFavorite(favoritedSpells[p])
+		ProteusUnmarkItemAsFavorite(favoritedSpells[p])
 		p += 1
 	endWhile
 
@@ -1333,7 +1332,7 @@ function Proteus_RemoveFavorites(Actor target)
 	p = 0
 	Form[] favoritedItems = ProteusDLLUtils.GetAllFavoritedItems()
 	while p < favoritedItems.Length
-		UnmarkItemAsFavorite(favoritedItems[p])
+		ProteusUnmarkItemAsFavorite(favoritedItems[p])
 		p += 1
 	endWhile
 endFunction
@@ -1403,7 +1402,7 @@ function Proteus_LoadCharacter(Actor target, String presetKnownName)
 					String ItemFormKeyFavs = jmap.nextKey(JItemMapListFavs, "", "")
 					while ItemFormKeyFavs 
 						Form value = jmap.GetForm(JItemMapListFavs, ItemFormKeyFavs, none) as Form
-						MarkItemAsFavorite(value)
+						ProteusMarkItemAsFavorite(value)
 						ItemFormKeyFavs = jmap.nextKey(JItemMapListFavs, ItemFormKeyFavs, "")
 					endwhile
 				EndIf
@@ -2814,7 +2813,7 @@ Function Proteus_LoadFavoritedSpells(String presetname)
 			String ItemFormKey = jmap.nextKey(JItemMapList, "", "")
 			while ItemFormKey 
 				Form value = jmap.GetForm(JItemMapList, ItemFormKey, none) as Form
-				MarkItemAsFavorite(value)
+				ProteusMarkItemAsFavorite(value)
 				ItemFormKey = jmap.nextKey(JItemMapList, ItemFormKey, "")
 			endwhile
 		EndIf
@@ -3513,7 +3512,7 @@ Function Proteus_SaveAllItems(String preset, Actor target, Bool saveUnequipped)
 		Int[] unequippedItemsCount = Utility.CreateIntArray(2000)
 
 		;PO3 SKSE scripts that will filter inventory to get unequipped items, equipped items, and favorited items
-		unequippedItems = AddAllItemsToArray(target, true, false, true)
+		unequippedItems = ProteusAddAllItemsToArray(target, true, false, true)
 
 		;get count unequipped items and record favorited unequipped items
 		int e = 0
@@ -6534,7 +6533,7 @@ Function SaveCrimeFactions(String presetName)
 	while j < maxCount
 		String value
 		Faction factionTemp = ZZCrimeFactions.GetAt(j) as Faction
-		String factionName = GetFormEditorID(factionTemp as Form)
+		String factionName = ProteusGetFormEditorID(factionTemp as Form)
 
 		String crimeGoldViolent = factionTemp.GetCrimeGoldViolent()
 		jmap.SetForm(jCrimeFactions, factionName + "_CrimeGoldViolent_" + crimeGoldViolent , factionTemp)
@@ -6624,7 +6623,7 @@ endFunction
 
 Function Proteus_CheatItem(int startingPoint, int currentPage, int typeCode) ;option 0 = cheat, 1 = reset
     Debug.Notification("Item menu loading...may take a few seconds!")
-    Form[] allGameItems = GetAllForms(typeCode) ;get all Items in game and from mods
+    Form[] allGameItems = ProteusGetAllByFormId(typeCode) ;get all Items in game and from mods
 
 	String typeString
 	if(typeCode == 41)
@@ -6652,7 +6651,7 @@ Function Proteus_CheatItem(int startingPoint, int currentPage, int typeCode) ;op
         listMenuBase.AddEntryItem("[Search " + typeString + "]")
         i+=1
         while startingPoint <= allGameItems.Length && i < 128
-			String name = GetFormEditorID(allGameItems[startingPoint])
+			String name = ProteusGetFormEditorID(allGameItems[startingPoint])
 			if(name == "")
 				name = allGameItems[startingPoint].GetName()
 			endif
@@ -6688,7 +6687,7 @@ Function Proteus_CheatItem(int startingPoint, int currentPage, int typeCode) ;op
 			Utility.Wait(0.1)
 			if (itemAmount > 0)   
 				player.AddItem(selectedItem, itemAmount,  true)
-				Debug.Notification(Proteus_Round(itemAmount, 0) + " " + GetFormEditorID(selectedItem) + " added to inventory.")
+				Debug.Notification(Proteus_Round(itemAmount, 0) + " " + ProteusGetFormEditorID(selectedItem) + " added to inventory.")
 				if(typeCode == 41 || typeCode == 26 || typeCode == 42)
 					Utility.Wait(0.1)
 					player.EquipItem(selectedItem)
@@ -6703,7 +6702,7 @@ Function Proteus_CheatItem(int startingPoint, int currentPage, int typeCode) ;op
 			Utility.Wait(0.1)
 			if (itemAmount > 0)   
 				player.AddItem(selectedItem, itemAmount,  true)
-				Debug.Notification(Proteus_Round(itemAmount, 0) + " " + GetFormEditorID(selectedItem) + " added to inventory.")
+				Debug.Notification(Proteus_Round(itemAmount, 0) + " " + ProteusGetFormEditorID(selectedItem) + " added to inventory.")
 				if(typeCode == 41 || typeCode == 26 || typeCode == 42)
 					Utility.Wait(0.1)
 					player.EquipItem(selectedItem)
@@ -6746,7 +6745,7 @@ Function Proteus_CheatItemSearch(Form[] foundItems, int startingPoint, int curre
         listMenuBase.AddEntryItem("[Search " + typeString + "]")
         i+=1
         while startingPoint <= allGameItems.Length && i < 128
-			String name = GetFormEditorID(allGameItems[startingPoint])
+			String name = ProteusGetFormEditorID(allGameItems[startingPoint])
 			if(name == "")
 				name = allGameItems[startingPoint].GetName()
 			endif
@@ -6781,7 +6780,7 @@ Function Proteus_CheatItemSearch(Form[] foundItems, int startingPoint, int curre
 			Utility.Wait(0.1)
 			if (itemAmount > 0)   
 				player.AddItem(selectedItem, itemAmount,  true)
-				Debug.Notification(Proteus_Round(itemAmount, 0) + " " + GetFormEditorID(selectedItem) + " added to inventory.")
+				Debug.Notification(Proteus_Round(itemAmount, 0) + " " + ProteusGetFormEditorID(selectedItem) + " added to inventory.")
 				if(typeCode == 41 || typeCode == 26 || typeCode == 42)
 					Utility.Wait(0.1)
 					player.EquipItem(selectedItem)
@@ -6796,7 +6795,7 @@ Function Proteus_CheatItemSearch(Form[] foundItems, int startingPoint, int curre
 			Utility.Wait(0.1)
 			if (itemAmount > 0)   
 				player.AddItem(selectedItem, itemAmount,  true)
-				Debug.Notification(Proteus_Round(itemAmount, 0) + " " + GetFormEditorID(selectedItem) + " added to inventory.")
+				Debug.Notification(Proteus_Round(itemAmount, 0) + " " + ProteusGetFormEditorID(selectedItem) + " added to inventory.")
 				if(typeCode == 41 || typeCode == 26 || typeCode == 42)
 					Utility.Wait(0.1)
 					player.EquipItem(selectedItem)

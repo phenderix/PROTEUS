@@ -76,6 +76,10 @@ Form[] Function ProteusGetItemBySearch(String containsText, Int formType) Global
 ; @return Returns 0 if there is an error.
 Form[] Function ProteusGetItemEditorIdBySearch(String containsText, Int formType) Global Native 
 
+; @brief Returns a list of items on the Object that match the parameters
+; @return Returns an empty list if there is an error.
+Form[] Function ProteusAddAllItemsToArray(ObjectReference akRef, bool abNoEquipped = true, bool abNoFavorited = false, bool abNoQuestItem = false) global native
+
 ; @brief Returns all the items from a form type with a cache.
 ; @return Returns 0 if there is an error.
 Form[] Function ProteusGetAllByFormId(Int formType) Global Native 
@@ -91,3 +95,35 @@ Int Function SetLevel(Actor actor, Int level) Global Native
 ; @brief Shows the racemenu
 ; @return Returns 0 if there is an error.
 Int Function ShowRaceMenu() Global Native 
+
+; @brief Favorites an item / spell / shout in the inventory
+; @return Returns 0 if there is an error.
+Int Function ProteusMarkItemAsFavorite(Form whichForm) Global Native 
+
+; @brief Unfavorites an item / spell / shout in the inventory
+; @return Returns 0 if there is an error.
+Int Function ProteusUnmarkItemAsFavorite(Form whichForm) Global Native 
+
+; @brief Returns the editor id for the form. Only works on Voices and Quests in SE.
+; @return Returns Empty String if there is an error.
+String Function ProteusGetFormEditorID(Form akForm) global native
+
+; @brief Replaces a keyword on a form with another keyword. Both keywords are required.
+; @return Returns 0 if there is an error.
+Function ProteusReplaceKeywordOnForm(Form akForm, Keyword akKeywordAdd, Keyword akKeywordRemove) global native
+
+; @brief Adds a new keyword to a form
+; @return Returns 0 if there is an error.
+Function ProteusAddKeywordToForm(Form akForm, Keyword akKeyword) global native
+
+; @brief Removes a keyword from a form
+; @return Returns 0 if there is an error.
+bool Function ProteusRemoveKeywordOnForm(Form akForm, Keyword akKeyword) global native
+
+; @brief Sets hair color on actor. Changes may persist throughout gaming session, even when reloading previous saves.
+; @return Returns 0 if there is an error.
+Function ProteusSetHairColor(Actor akActor, ColorForm akColor) global native
+
+; @brief Returns true or false if the form is part of a mod
+; @return Returns 0 if there is an error.
+bool Function ProteusIsFormInMod(Form akForm, String asModName) global native

@@ -1,7 +1,6 @@
 
 scriptName SIGEWeaponLoadAliasScript extends ReferenceAlias
 
-import PO3_SKSEFunctions
 import PhenderixToolResourceScript
 import JContainers
 

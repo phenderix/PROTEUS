@@ -1,25 +1,24 @@
 Scriptname ProteusCheatFunctions 
 
-import PO3_SKSEFunctions
 import PhenderixToolResourceScript
 import CharGen
 import JContainers
 import ProteusDLLUtils
 
 String Function GetFormMenuName(Form theForm) global
-    String name = GetFormEditorID(theForm)
-		if(name == "")
-			name = theForm.GetName()
-		endif
-        if(name == "")
-            name = "(Missing Name)"
-        endif
+    String name = ProteusGetFormEditorID(theForm)
+	if(name == "")
+		name = theForm.GetName()
+	endif 
+    if(name == "")
+        name = "(Missing Name)"
+    endif
     return name
 EndFunction
 
 Function Proteus_CheatSpell(Actor targetActor, int startingPoint, int currentPage, int typeCode, Quest ZZProteusSkyUIMenu) global ;option 0 = cheat, 1 = reset
     Debug.Notification("Spell menu loading...may take a few seconds!")
-    Form[] allGameSpells = GetAllForms(typeCode) ;get all Spells in game and from mods
+    Form[] allGameSpells = ProteusGetAllByFormId(typeCode) ;get all Spells in game and from mods
 
     int numPages = (allGameSpells.Length / 127) as Int
     int startingPointInitial = startingPoint
@@ -126,7 +125,7 @@ EndFunction
 
 Function Proteus_CheatPerk(Actor targetActor, int startingPoint, int currentPage, int typeCode, Quest ZZProteusSkyUIMenu) global ;option 0 = cheat, 1 = reset
     Debug.Notification("Perk menu loading...may take a few seconds!")
-    Form[] allGamePerks = GetAllForms(typeCode) ;get all Perks in game and from mods
+    Form[] allGamePerks = ProteusGetAllByFormId(typeCode) ;get all Perks in game and from mods
 
     int numPages = (allGamePerks.Length / 127) as Int
     int startingPointInitial = startingPoint
@@ -240,7 +239,7 @@ EndFunction
 
 Function Proteus_CheatShout(Actor targetActor, int startingPoint, int currentPage, int typeCode, Quest ZZProteusSkyUIMenu) global ;option 0 = cheat, 1 = reset
     Debug.Notification("Shout menu loading...may take a few seconds!")
-    Form[] allGameShouts = GetAllForms(typeCode) ;get all Shouts in game and from mods
+    Form[] allGameShouts = ProteusGetAllByFormId(typeCode) ;get all Shouts in game and from mods
 
     int numPages = (allGameShouts.Length / 127) as Int
     int startingPointInitial = startingPoint

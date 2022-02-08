@@ -1,7 +1,6 @@
 Scriptname ProteusSpawnerScript extends activemagiceffect  
 
 Import ProteusDLLUtils
-Import PO3_SKSEFunctions
 Import PhenderixToolResourceScript
 
 ;Addded in v.3.7.0
@@ -440,7 +439,7 @@ endFunction
 
 Function Proteus_Spawner(int startingPoint, int currentPage) ;option 0 = cheat, 1 = reset
     Debug.Notification("Spawner menu loading...may take a few seconds!")
-    Form[] allGameForms = GetAllForms(43) ;get all NPCs in game and from mods
+    Form[] allGameForms = ProteusGetAllByFormId(43) ;get all NPCs in game and from mods
 
     int numPages = (allGameForms.Length / 127) as Int
     int startingPointInitial = startingPoint
@@ -453,7 +452,7 @@ Function Proteus_Spawner(int startingPoint, int currentPage) ;option 0 = cheat, 
         listMenuBase.AddEntryItem("[Search]")
         i+=1
         while startingPoint <= allGameForms.Length && i < 128
-			String name = GetFormEditorID(allGameForms[startingPoint])
+			String name = ProteusGetFormEditorID(allGameForms[startingPoint])
 			if(name == "")
 				name = allGameForms[startingPoint].GetName()
 			endif
@@ -514,7 +513,7 @@ Function Proteus_SpawnerSearch(Form[] foundItems, int startingPoint, int current
         listMenuBase.AddEntryItem("[Search]")
         i+=1
         while startingPoint <= allGameForms.Length && i < 128
-			String name = GetFormEditorID(allGameForms[startingPoint])
+			String name = ProteusGetFormEditorID(allGameForms[startingPoint])
 			if(name == "")
 				name = allGameForms[startingPoint].GetName()
 			endif
