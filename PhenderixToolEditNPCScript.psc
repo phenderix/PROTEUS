@@ -1,4 +1,3 @@
-
 scriptName PhenderixToolEditNPCScript extends activemagiceffect
 
 import PO3_SKSEFunctions

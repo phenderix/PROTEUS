@@ -5,7 +5,7 @@ import PO3_SKSEFunctions
 import CharGen
 import PhenderixToolResourceScript
 Import JContainers
-Import ConsoleUtil
+Import ProteusCheatFunctions
 
 ;Properties
 globalvariable property k1 auto
@@ -218,6 +218,7 @@ Bool playerPresetFirstLoad
 ObjectReference tempMarker
 String JContGlobalPath
 Float targetCW
+ColorForm playerHairColor
 Bool running
 
 ;Variables (tracking active mods)
@@ -423,8 +424,9 @@ endFunction
 
 Function Proteus_SaveGame()
 	Utility.Wait(0.1)
-	Game.SaveGame("Proteus_Save_" + Proteus_Round(ZZNPCAppearanceSaved.GetValue(), 0) + "_" + Proteus_Round(ZZZSaveGameCounter.GetValue(),0))
-	ZZZSaveGameCounter.SetValue(ZZZSaveGameCounter.GetValue() + 1)
+	Game.RequestSave()
+	;Game.SaveGame("Proteus_Save_" + Proteus_Round(ZZNPCAppearanceSaved.GetValue(), 0) + "_" + Proteus_Round(ZZZSaveGameCounter.GetValue(),0))
+	;ZZZSaveGameCounter.SetValue(ZZZSaveGameCounter.GetValue() + 1)
 endFunction
 
 function Proteus_PlayerMainMenu()
@@ -523,7 +525,7 @@ function Proteus_PlayerMainMenu()
 		endIf
 		Proteus_LockDisable()
 	elseIf result == 11 ;racemenu enhanced
-		;ExecuteCommand("showracemenu")
+		ShowRaceMenu()
 		Utility.Wait(0.5)
 		String presetName = player.GetActorBase().GetName()
 		Int lengthPresetName = StringUtil.GetLength(presetName as String)
@@ -661,13 +663,13 @@ function PlayerCheats()
 	elseif result == 5 ;book
 		Proteus_CheatItem(0, 1, 27)
 	elseif result == 6 ;spell
-		Proteus_CheatSpell(0, 1, 22)
+		Proteus_CheatSpell(player, 0, 1, 22, ZZProteusSkyUIMenu)
 	elseif result == 7 ;perk
-		Proteus_CheatPerk(0, 1, 92)
+		Proteus_CheatPerk(player, 0, 1, 92, ZZProteusSkyUIMenu)
 	elseif result == 8 ;shout
 		Debug.MessageBox("Be careful using this function. Learning shouts you are not supposed to know yet, that are given by quest lines, may break the associated quest. \n\nLearning a shout via this feature will also teach you its corresponding words of power.")
 		Utility.Wait(0.1)
-		Proteus_CheatShout(0, 1, 119)
+		Proteus_CheatShout(player, 0, 1, 119, ZZProteusSkyUIMenu)
 	elseif result == 9 ;perk points
 		String amount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many perk points?")
 		if(amount as Int > 0)
@@ -1445,7 +1447,7 @@ function Proteus_LoadCharacterSpawn(Actor target, String presetKnownName)
 		Debug.Notification("Select which character to spawn as an enemy.")
 		presetName = Proteus_SelectPresetSpawn()
 	elseif(presetKnownName == "")
-		Debug.Notification("Select which character to spawn as an ally.")
+		Debug.Notification("Select which character to import.")
 		presetName = Proteus_SelectPresetSpawnImport()
 	else
 		presetName = presetKnownName
@@ -2864,22 +2866,20 @@ endFunction
 Function Proteus_LoadCharacterAppearance(String presetName, Actor target, Race currentRace, Race presetRace, int option)
 	if(option == 0) ;for player
 		if(presetRace == currentRace)
-			ColorForm colorHair = target.GetActorBase().GetHairColor()
-			LoadCharacterPreset(target, presetName, colorHair)	
+			LoadCharacterPreset(target, presetName, playerHairColor)	
 			LoadCharacter(target, presetRace, presetName)
 			;LoadExternalCharacter(target, presetRace, presetName)
 		else
 			target.SetRace(presetRace)
 			Utility.Wait(0.1)
-			ColorForm colorHair = target.GetActorBase().GetHairColor()
-			LoadCharacterPreset(target, presetName, colorHair)	
+			LoadCharacterPreset(target, presetName, playerHairColor)	
 			LoadCharacter(target, presetRace, presetName)
 			Utility.Wait(0.1)	
 			target.SetRace(currentRace)
 			Utility.Wait(0.1)
 			target.SetRace(presetRace)
 			Utility.Wait(0.1)
-			LoadCharacterPreset(target, presetName, colorHair)	
+			LoadCharacterPreset(target, presetName, playerHairColor)	
 			LoadCharacter(target, presetRace, presetName)
 			;LoadExternalCharacter(target, presetRace, presetName)
 		endIf
@@ -2929,6 +2929,8 @@ function Proteus_SaveTargetStrings(Actor targetBackup, String presetName)
 			value = targetBackup.GetRace().GetName() as String
 		elseif j == 3
 			value = targetBackup.GetBaseAV("CarryWeight") as String
+		elseif j == 4
+			value = player.GetActorBase().GetHairColor().GetColor() as String
 		EndIf
 		j += 1
 		jmap.SetStr(jNText, text, value)
@@ -2957,10 +2959,10 @@ function Proteus_LoadTargetStrings(String presetName, Actor target, int option)
 				endIf
 			elseif text == "gender"
 				if(value == 0) ;male
-					Debug.MessageBox("Change to Male")
+					;Debug.MessageBox("Change to Male")
 					SetSex(target, 0) 
 				Elseif (value == 1) ;female
-					Debug.MessageBox("Change to Female")
+					;Debug.MessageBox("Change to Female")
 					SetSex(target, 1) 
 				endIf
 			elseif text == "race"
@@ -2968,6 +2970,9 @@ function Proteus_LoadTargetStrings(String presetName, Actor target, int option)
 				if(option == 2)
 					targetCW = value as Float
 				endIf
+			elseif text == "hairColor"
+				Int playerHairColorInt = value as Int
+				playerHairColor.SetColor(playerHairColorInt)
 			EndIf
 			text = jmap.nextKey(JStringList, text, "")
 			i += 1
@@ -3731,7 +3736,8 @@ Function Proteus_LoadItems2(String presetName, Actor target, int counter)
     String ItemFormKey = jmap.nextKey(JItemMapList, "", "")
     while ItemFormKey 
         Form value = jmap.GetForm(JItemMapList, ItemFormKey, none) as Form
-        int amount = StringUtil.Substring(ItemFormKey, StringUtil.Find(ItemFormKey, "ProteusCount") + 12, StringUtil.Find(ItemFormKey, "_ProteusHand")) as Int
+        int amount = StringUtil.Substring(ItemFormKey, StringUtil.Find(ItemFormKey, "ProteusCount") + 13) as Int
+
 		target.AddItem(value, amount)
         ItemFormKey = jmap.nextKey(JItemMapList, ItemFormKey, "")
     endwhile
@@ -4853,8 +4859,7 @@ Function Proteus_SwitchCharacter()
 					Proteus_LoadCharacterSpawn(target, playerPresetName)
 					Utility.Wait(0.1)
 
-					ColorForm colorHair = player.GetActorBase().GetHairColor()
-					LoadCharacterPreset(player, targetPresetName, colorHair)
+					LoadCharacterPreset(player, targetPresetName, playerHairColor)
 
 					target.DispelAllSpells()
 
@@ -6254,12 +6259,12 @@ Function Proteus_NewCharacter()
 	Proteus_CheatItem(0, 1, 41) ;weapon search
 
 	Utility.Wait(0.1)
-	Proteus_CheatSpell(0, 1, 22)
+	Proteus_CheatSpell(player, 0, 1, 22, ZZProteusSkyUIMenu)
 	Utility.Wait(0.1)
 
 	;dispel spells, add back important mod items, and edit appearance
 	player.DispelAllSpells()
-	;ExecuteCommand("showracemenu")
+	ShowRaceMenu()
 	Utility.Wait(0.1)
 	Proteus_AddBackModItems()
 	Utility.Wait(0.1)
@@ -6803,388 +6808,3 @@ Function Proteus_CheatItemSearch(Form[] foundItems, int startingPoint, int curre
         endIf
     endIf
 EndFunction
-
-
-
-
-
-
-
-
-Function Proteus_CheatSpell(int startingPoint, int currentPage, int typeCode) ;option 0 = cheat, 1 = reset
-    Debug.Notification("Spell menu loading...may take a few seconds!")
-    Form[] allGameSpells = GetAllForms(typeCode) ;get all Spells in game and from mods
-
-    int numPages = (allGameSpells.Length / 127) as Int
-    int startingPointInitial = startingPoint
-
-    UIListMenu listMenuBase = UIExtensions.GetMenu("UIListMenu") as UIListMenu
-    if listMenuBase 
-        int i = 0
-        listMenuBase.AddEntryItem("[Done Adding Spells]")
-        i+=1
-        listMenuBase.AddEntryItem("[Search Spells]")
-        i+=1
-        while startingPoint <= allGameSpells.Length && i < 128
-			String name = GetFormEditorID(allGameSpells[startingPoint])
-			if(name == "")
-				name = allGameSpells[startingPoint].GetName()
-			endif
-            listMenuBase.AddEntryItem(name)
-            i += 1
-            startingPoint += 1
-            if(i == 127)
-                listMenuBase.AddEntryItem("[Continue to Page " + Proteus_Round(currentPage + 1, 0) as String + " of " + Proteus_Round(numPages, 0) as String + "]")
-            endIf
-        endwhile
-    EndIf
-    listMenuBase.OpenMenu()
-    int result = listMenuBase.GetResultInt()
-    if result == 1 ;search option
-        String searchTerm = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Search for:")
-        Utility.Wait(0.1)
-        Int lengthSearchTerm = StringUtil.GetLength(searchTerm)
-        if (lengthSearchTerm > 0)   
-            int spellCount = ProteusDLLUtils.ProteusGetItemCount(searchTerm, typeCode)
-			Form[] foundSpells = ProteusDLLUtils.ProteusGetItemBySearch(searchTerm, typeCode)
-            Proteus_CheatSpellSearch(foundSpells, 0, 1, typeCode)
-        else
-            Debug.Notification("Invalid length search term.")
-        endIf
-
-    elseif result == 127 ;next page option
-        currentPage += 1
-        Proteus_CheatSpell(startingPoint, currentPage, typeCode)
-    elseif(result > 0 && result != 127)
-        if(startingPoint > 127)
-            Form selectedSpell = allGameSpells[startingPointInitial + result - 2]
-            player.AddSpell(selectedSpell as Spell)
-            Proteus_CheatSpell(startingPointInitial, currentPage, typeCode)
-        Else
-            Form selectedSpell = allGameSpells[result - 2]
-            player.AddSpell(selectedSpell as Spell)
-            Proteus_CheatSpell(startingPointInitial, currentPage, typeCode)
-        endIf
-    endIf
-EndFunction
-
-Function Proteus_CheatSpellSearch(Form[] foundSpells, int startingPoint, int currentPage, int typeCode) ;option 0 = cheat, 1 = reset
-    Debug.Notification("Spell menu loading...may take a few seconds!")
-    Form[] allGameSpells = foundSpells ;get all Spells in game and from mods
-
-    int numPages = (allGameSpells.Length / 127) as Int
-    int startingPointInitial = startingPoint
-
-    UIListMenu listMenuBase = UIExtensions.GetMenu("UIListMenu") as UIListMenu
-    if listMenuBase 
-        int i = 0
-        listMenuBase.AddEntryItem("[Done Adding Spells]")
-        i+=1
-        listMenuBase.AddEntryItem("[Search Spells]")
-        i+=1
-        while startingPoint <= allGameSpells.Length && i < 128
-			String name = GetFormEditorID(allGameSpells[startingPoint])
-			if(name == "")
-				name = allGameSpells[startingPoint].GetName()
-			endif
-            listMenuBase.AddEntryItem(name)
-            i += 1
-            startingPoint += 1
-            if(i == 127)
-                listMenuBase.AddEntryItem("[Continue to Page " + Proteus_Round(currentPage + 1, 0) as String + " of " + Proteus_Round(numPages, 0) as String + "]")
-            endIf
-        endwhile
-    EndIf
-    listMenuBase.OpenMenu()
-    int result = listMenuBase.GetResultInt()
-    if result == 1 ;search option
-        String searchTerm = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Search for:")
-        Utility.Wait(0.1)
-        Int lengthSearchTerm = StringUtil.GetLength(searchTerm)
-        if (lengthSearchTerm > 0)   
-            int spellCount = ProteusDLLUtils.ProteusGetItemCount(searchTerm, typeCode)
-			Form[] foundSpells2 = ProteusDLLUtils.ProteusGetItemBySearch(searchTerm, typeCode)
-            Proteus_CheatSpellSearch(foundSpells2, 0, 1, typeCode)
-        else
-            Debug.Notification("Invalid length search term.")
-        endIf
-    elseif result == 127 ;next page option
-        currentPage += 1
-        Proteus_CheatSpellSearch(foundSpells, startingPoint, currentPage, typeCode)
-    elseif(result > 0 && result != 127)
-        if(startingPoint > 127)
-            Form selectedSpell = allGameSpells[startingPointInitial + result - 2]
-            player.AddSpell(selectedSpell as Spell)
-            Proteus_CheatSpellSearch(foundSpells, startingPointInitial, currentPage, typeCode)
-        Else
-            Form selectedSpell = foundSpells[result - 2]
-            player.AddSpell(selectedSpell as Spell)
-            Proteus_CheatSpellSearch(foundSpells, startingPointInitial, currentPage, typeCode)
-        endIf
-    endIf
-EndFunction
-
-
-
-
-Function Proteus_CheatPerk(int startingPoint, int currentPage, int typeCode) ;option 0 = cheat, 1 = reset
-    Debug.Notification("Perk menu loading...may take a few seconds!")
-    Form[] allGamePerks = GetAllForms(typeCode) ;get all Perks in game and from mods
-
-    int numPages = (allGamePerks.Length / 127) as Int
-    int startingPointInitial = startingPoint
-
-    UIListMenu listMenuBase = UIExtensions.GetMenu("UIListMenu") as UIListMenu
-    if listMenuBase 
-        int i = 0
-        listMenuBase.AddEntryItem("[Done Adding Perks]")
-        i+=1
-        listMenuBase.AddEntryItem("[Search Perks]")
-        i+=1
-        while startingPoint <= allGamePerks.Length && i < 128
-			String name = GetFormEditorID(allGamePerks[startingPoint])
-			if(name == "")
-				name = allGamePerks[startingPoint].GetName()
-			endif
-            listMenuBase.AddEntryItem(name)
-            i += 1
-            startingPoint += 1
-            if(i == 127)
-                listMenuBase.AddEntryItem("[Continue to Page " + Proteus_Round(currentPage + 1, 0) as String + " of " + Proteus_Round(numPages, 0) as String + "]")
-            endIf
-        endwhile
-    EndIf
-    listMenuBase.OpenMenu()
-    int result = listMenuBase.GetResultInt()
-    if result == 1 ;search option
-        String searchTerm = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Search for:")
-        Utility.Wait(0.1)
-        Int lengthSearchTerm = StringUtil.GetLength(searchTerm)
-        if (lengthSearchTerm > 0)   
-            int PerkCount = ProteusDLLUtils.ProteusGetItemCount(searchTerm, typeCode)
-            Form[] foundPerks = ProteusDLLUtils.ProteusGetItemBySearch(searchTerm, typeCode)
-            Proteus_CheatPerkSearch(foundPerks, 0, 1, typeCode)
-        else
-            Debug.Notification("Invalid length search term.")
-        endIf
-
-    elseif result == 127 ;next page option
-        currentPage += 1
-        Proteus_CheatPerk(startingPoint, currentPage, typeCode)
-    elseif(result > 0 && result != 127)
-        if(startingPoint > 127)
-            Form selectedPerk = allGamePerks[startingPointInitial + result - 2]
-            player.AddPerk(selectedPerk as Perk)
-			Debug.Notification(selectedPerk.getName() + " added.")
-            Proteus_CheatPerk(startingPointInitial, currentPage, typeCode)
-        Else
-            Form selectedPerk = allGamePerks[result - 2]
-            player.AddPerk(selectedPerk as Perk)
-			Debug.Notification(selectedPerk.getName() + " added.")
-            Proteus_CheatPerk(startingPointInitial, currentPage, typeCode)
-        endIf
-    endIf
-EndFunction
-
-Function Proteus_CheatPerkSearch(Form[] foundPerks, int startingPoint, int currentPage, int typeCode) ;option 0 = cheat, 1 = reset
-    Debug.Notification("Perk menu loading...may take a few seconds!")
-    Form[] allGamePerks = foundPerks ;get all Perks in game and from mods
-
-    int numPages = (allGamePerks.Length / 127) as Int
-    int startingPointInitial = startingPoint
-
-    UIListMenu listMenuBase = UIExtensions.GetMenu("UIListMenu") as UIListMenu
-    if listMenuBase 
-        int i = 0
-        listMenuBase.AddEntryItem("[Done Adding Perks]")
-        i+=1
-        listMenuBase.AddEntryItem("[Search Perks]")
-        i+=1
-        while startingPoint <= allGamePerks.Length && i < 128
-			String name = GetFormEditorID(allGamePerks[startingPoint])
-			if(name == "")
-				name = allGamePerks[startingPoint].GetName()
-			endif
-            listMenuBase.AddEntryItem(name)
-            i += 1
-            startingPoint += 1
-            if(i == 127)
-                listMenuBase.AddEntryItem("[Continue to Page " + Proteus_Round(currentPage + 1, 0) as String + " of " + Proteus_Round(numPages, 0) as String + "]")
-            endIf
-        endwhile
-    EndIf
-    listMenuBase.OpenMenu()
-    int result = listMenuBase.GetResultInt()
-    if result == 1 ;search option
-        String searchTerm = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Search for:")
-        Utility.Wait(0.1)
-        Int lengthSearchTerm = StringUtil.GetLength(searchTerm)
-        if (lengthSearchTerm > 0)   
-            int PerkCount = ProteusDLLUtils.ProteusGetItemCount(searchTerm, typeCode)
-            Form[] foundPerks2 = ProteusDLLUtils.ProteusGetItemBySearch(searchTerm, typeCode)
-            Proteus_CheatPerkSearch(foundPerks2, 0, 1, typeCode)
-        else
-            Debug.Notification("Invalid length search term.")
-        endIf
-    elseif result == 127 ;next page option
-        currentPage += 1
-        Proteus_CheatPerkSearch(foundPerks, startingPoint, currentPage, typeCode)
-    elseif(result > 0 && result != 127)
-        if(startingPoint > 127)
-            Form selectedPerk = allGamePerks[startingPointInitial + result - 2]
-            player.AddPerk(selectedPerk as Perk)
-			Debug.Notification(selectedPerk.getName() + " added.")
-            Proteus_CheatPerkSearch(foundPerks, startingPointInitial, currentPage, typeCode)
-        Else
-            Form selectedPerk = foundPerks[result - 2]
-            player.AddPerk(selectedPerk as Perk)
-			Debug.Notification(selectedPerk.getName() + " added.")
-            Proteus_CheatPerkSearch(foundPerks, startingPointInitial, currentPage, typeCode)
-        endIf
-    endIf
-EndFunction
-
-
-
-
-Function Proteus_CheatShout(int startingPoint, int currentPage, int typeCode) ;option 0 = cheat, 1 = reset
-    Debug.Notification("Shout menu loading...may take a few seconds!")
-    Form[] allGameShouts = GetAllForms(typeCode) ;get all Shouts in game and from mods
-
-    int numPages = (allGameShouts.Length / 127) as Int
-    int startingPointInitial = startingPoint
-
-    UIListMenu listMenuBase = UIExtensions.GetMenu("UIListMenu") as UIListMenu
-    if listMenuBase 
-        int i = 0
-        listMenuBase.AddEntryItem("[Done Adding Shouts]")
-        i+=1
-        listMenuBase.AddEntryItem("[Search Shouts]")
-        i+=1
-        while startingPoint <= allGameShouts.Length && i < 128
-			String name = GetFormEditorID(allGameShouts[startingPoint])
-			if(name == "")
-				name = allGameShouts[startingPoint].GetName()
-			endif
-            listMenuBase.AddEntryItem(name)
-            i += 1
-            startingPoint += 1
-            if(i == 127)
-                listMenuBase.AddEntryItem("[Continue to Page " + Proteus_Round(currentPage + 1, 0) as String + " of " + Proteus_Round(numPages, 0) as String + "]")
-            endIf
-        endwhile
-    EndIf
-    listMenuBase.OpenMenu()
-    int result = listMenuBase.GetResultInt()
-    if result == 1 ;search option
-        String searchTerm = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Search for:")
-        Utility.Wait(0.1)
-        Int lengthSearchTerm = StringUtil.GetLength(searchTerm)
-        if (lengthSearchTerm > 0)   
-            int ShoutCount = ProteusDLLUtils.ProteusGetItemCount(searchTerm, typeCode)
-            Form[] foundShouts = ProteusDLLUtils.ProteusGetItemBySearch(searchTerm, typeCode)
-            Proteus_CheatShoutSearch(foundShouts, 0, 1, typeCode)
-        else
-            Debug.Notification("Invalid length search term.")
-        endIf
-
-    elseif result == 127 ;next page option
-        currentPage += 1
-        Proteus_CheatShout(startingPoint, currentPage, typeCode)
-    elseif(result > 0 && result != 127)
-        if(startingPoint > 127)
-            Form selectedShout = allGameShouts[startingPointInitial + result - 2]
-            player.AddShout(selectedShout as Shout)
-			int s = 0
-			while (selectedShout as Shout).GetNthWordOfPower(s)
-				WordOfPower wordTemp = (selectedShout as Shout).GetNthWordOfPower(s)
-				Game.UnlockWord(wordTemp)
-				s+=1
-			endWhile
-			Debug.Notification(selectedShout.getName() + " added.")
-            Proteus_CheatShout(startingPointInitial, currentPage, typeCode)
-        Else
-            Form selectedShout = allGameShouts[result - 2]
-            player.AddShout(selectedShout as Shout)
-			int s = 0
-			while (selectedShout as Shout).GetNthWordOfPower(s)
-				WordOfPower wordTemp = (selectedShout as Shout).GetNthWordOfPower(s)
-				Game.UnlockWord(wordTemp)
-				s+=1
-			endWhile
-			Debug.Notification(selectedShout.getName() + " added.")
-            Proteus_CheatShout(startingPointInitial, currentPage, typeCode)
-        endIf
-    endIf
-EndFunction
-
-Function Proteus_CheatShoutSearch(Form[] foundShouts, int startingPoint, int currentPage, int typeCode) ;option 0 = cheat, 1 = reset
-    Debug.Notification("Shout menu loading...may take a few seconds!")
-    Form[] allGameShouts = foundShouts ;get all Shouts in game and from mods
-
-    int numPages = (allGameShouts.Length / 127) as Int
-    int startingPointInitial = startingPoint
-
-    UIListMenu listMenuBase = UIExtensions.GetMenu("UIListMenu") as UIListMenu
-    if listMenuBase 
-        int i = 0
-        listMenuBase.AddEntryItem("[Done Adding Shouts]")
-        i+=1
-        listMenuBase.AddEntryItem("[Search Shouts]")
-        i+=1
-        while startingPoint <= allGameShouts.Length && i < 128
-			String name = GetFormEditorID(allGameShouts[startingPoint])
-			if(name == "")
-				name = allGameShouts[startingPoint].GetName()
-			endif
-            listMenuBase.AddEntryItem(GetFormEditorID(allGameShouts[startingPoint]))
-            i += 1
-            startingPoint += 1
-            if(i == 127)
-                listMenuBase.AddEntryItem("[Continue to Page " + Proteus_Round(currentPage + 1, 0) as String + " of " + Proteus_Round(numPages, 0) as String + "]")
-            endIf
-        endwhile
-    EndIf
-    listMenuBase.OpenMenu()
-    int result = listMenuBase.GetResultInt()
-    if result == 1 ;search option
-        String searchTerm = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Search for:")
-        Utility.Wait(0.1)
-        Int lengthSearchTerm = StringUtil.GetLength(searchTerm)
-        if (lengthSearchTerm > 0)   
-            int ShoutCount = ProteusDLLUtils.ProteusGetItemCount(searchTerm, typeCode)
-            Form[] foundShouts2 = ProteusDLLUtils.ProteusGetItemBySearch(searchTerm, typeCode)
-            Proteus_CheatShoutSearch(foundShouts2, 0, 1, typeCode)
-        else
-            Debug.Notification("Invalid length search term.")
-        endIf
-    elseif result == 127 ;next page option
-        currentPage += 1
-        Proteus_CheatShoutSearch(foundShouts, startingPoint, currentPage, typeCode)
-    elseif(result > 0 && result != 127)
-        if(startingPoint > 127)
-            Form selectedShout = allGameShouts[startingPointInitial + result - 2]
-            player.AddShout(selectedShout as Shout)
-			int s = 0
-			while (selectedShout as Shout).GetNthWordOfPower(s)
-				WordOfPower wordTemp = (selectedShout as Shout).GetNthWordOfPower(s)
-				Game.UnlockWord(wordTemp)
-				s+=1
-			endWhile
-			Debug.Notification(selectedShout.getName() + " added.")
-            Proteus_CheatShoutSearch(foundShouts, startingPointInitial, currentPage, typeCode)
-        Else
-            Form selectedShout = foundShouts[result - 2]
-            player.AddShout(selectedShout as Shout)
-			int s = 0
-			while (selectedShout as Shout).GetNthWordOfPower(s)
-				WordOfPower wordTemp = (selectedShout as Shout).GetNthWordOfPower(s)
-				Game.UnlockWord(wordTemp)
-				s+=1
-			endWhile
-			Debug.Notification(selectedShout.getName() + " added.")
-            Proteus_CheatShoutSearch(foundShouts, startingPointInitial, currentPage, typeCode)
-        endIf
-    endIf
-EndFunction
-

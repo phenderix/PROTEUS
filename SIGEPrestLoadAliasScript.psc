@@ -129,7 +129,7 @@ function JLoadNPCAcrossAllSaves()
 				i += 1
 
 				;equip items back onto npcs, ensures they aren't wearing their default outfit
-				Proteus_EquipItems(processedNPCName, (NPCArray[i] as Actor))
+				;Proteus_EquipItems(processedNPCName, (NPCArray[i] as Actor))
 
 			endIf
 		endWhile

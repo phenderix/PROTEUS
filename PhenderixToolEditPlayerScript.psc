@@ -261,8 +261,9 @@ endFunction
 
 Function Proteus_SaveGame()
 	Utility.Wait(0.1)
-	Game.SaveGame("Proteus_Save_" + Proteus_Round(ZZNPCAppearanceSaved.GetValue(), 0) + "_" + Proteus_Round(ZZZSaveGameCounter.GetValue(),0))
-	ZZZSaveGameCounter.SetValue(ZZZSaveGameCounter.GetValue() + 1)
+	Game.RequestSave()
+	;Game.SaveGame("Proteus_Save_" + Proteus_Round(ZZNPCAppearanceSaved.GetValue(), 0) + "_" + Proteus_Round(ZZZSaveGameCounter.GetValue(),0))
+	;ZZZSaveGameCounter.SetValue(ZZZSaveGameCounter.GetValue() + 1)
 endFunction
 
 function Proteus_PlayerMainMenu()
@@ -361,7 +362,7 @@ function Proteus_PlayerMainMenu()
 		endIf
 		Proteus_LockDisable()
 	elseIf result == 11 ;racemenu enhanced
-		;ExecuteCommand("showracemenu")
+		ShowRaceMenu()
 		Utility.Wait(0.5)
 		String presetName = player.GetActorBase().GetName()
 		Int lengthPresetName = StringUtil.GetLength(presetName as String)
@@ -6100,7 +6101,7 @@ Function Proteus_NewCharacter()
 
 	;dispel spells, add back important mod items, and edit appearance
 	player.DispelAllSpells()
-	;ExecuteCommand("showracemenu")
+	ShowRaceMenu()
 	Utility.Wait(0.1)
 	Proteus_AddBackModItems()
 	Utility.Wait(0.1)
