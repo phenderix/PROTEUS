@@ -20,6 +20,12 @@ Float targetCW ;not used as of now
 
 function OnPlayerLoadGame()
 	utility.Wait(0.100000)
+
+	Int isDllLoaded = ProteusDLLUtils.IsDLLLoaded()
+	if(isDllLoaded == 0)
+		Debug.MessageBox("The SKSE Proteus.dll plugin failed to load. Please correct your installation before proceeding.")
+	endif
+
 	JContGlobalPath = jcontainers.userdirectory() ;sets JContainers directory for file paths
 	if(ZZLoadPlayerPreset.GetValue() == 1 && ZZHasSavedPlayerCharacter.GetValue() > 0)
 		JLoadPlayerAcrossAllSaves()

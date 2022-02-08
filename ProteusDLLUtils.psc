@@ -1,5 +1,9 @@
 ScriptName ProteusDLLUtils
 
+; @brief Returns if the DLL is loaded and connected
+; @return Returns 0 if there is an error.
+Int Function IsDLLLoaded() Global Native 
+
 ; @brief Returns the current Standing Stone Perk.
 ; @return Returns 0 if there is an error or if the player doesnt have one.
 Perk Function GetCurrentStandingStonePerk(Actor actor) global native
