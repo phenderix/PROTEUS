@@ -110,11 +110,11 @@ String Function ProteusGetFormEditorID(Form akForm) global native
 
 ; @brief Replaces a keyword on a form with another keyword. Both keywords are required.
 ; @return Returns 0 if there is an error.
-Function ProteusReplaceKeywordOnForm(Form akForm, Keyword akKeywordAdd, Keyword akKeywordRemove) global native
+Int Function ProteusReplaceKeywordOnForm(Form akForm, Keyword akKeywordAdd, Keyword akKeywordRemove) global native
 
 ; @brief Adds a new keyword to a form
 ; @return Returns 0 if there is an error.
-Function ProteusAddKeywordToForm(Form akForm, Keyword akKeyword) global native
+Int Function ProteusAddKeywordToForm(Form akForm, Keyword akKeyword) global native
 
 ; @brief Removes a keyword from a form
 ; @return Returns 0 if there is an error.
@@ -122,7 +122,7 @@ bool Function ProteusRemoveKeywordOnForm(Form akForm, Keyword akKeyword) global 
 
 ; @brief Sets hair color on actor. Changes may persist throughout gaming session, even when reloading previous saves.
 ; @return Returns 0 if there is an error.
-Function ProteusSetHairColor(Actor akActor, ColorForm akColor) global native
+Int Function ProteusSetHairColor(Actor akActor, ColorForm akColor) global native
 
 ; @brief Returns true or false if the form is part of a mod
 ; @return Returns 0 if there is an error.
