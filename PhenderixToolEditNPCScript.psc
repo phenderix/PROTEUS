@@ -119,7 +119,7 @@ function Proteus_NPCMainMenu(Actor gTarget)
 	stringArray[7] = " Duplicate"
 	stringArray[8] = " Protected/Essential/Kill"
 	stringArray[9] = " Recruit/Marry"
-	stringArray[10] = " Spells"
+	stringArray[10] = " Spells/Perks"
 	stringArray[11] = " Items"
 	stringArray[12] = " Idle Animations"
 	stringArray[13] = " Voice Type"
