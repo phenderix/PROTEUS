@@ -487,17 +487,17 @@ function PlayerCheats()
 	
 
 	if result == 0 ;weapon
-		Proteus_CheatItem(0, 1, 41)
+		Proteus_CheatItem(player, 0, 1, 41)
 	elseIf result == 1 ;armor
-		Proteus_CheatItem(0, 1, 26)
+		Proteus_CheatItem(player, 0, 1, 26)
 	elseif result == 2 ;misc item
-		Proteus_CheatItem(0, 1, 32)
+		Proteus_CheatItem(player, 0, 1, 32)
 	elseif result == 3 ;ammo
-		Proteus_CheatItem(0, 1, 42)
+		Proteus_CheatItem(player, 0, 1, 42)
 	elseif result == 4 ;scroll
-		Proteus_CheatItem(0, 1, 23)
+		Proteus_CheatItem(player, 0, 1, 23)
 	elseif result == 5 ;book
-		Proteus_CheatItem(0, 1, 27)
+		Proteus_CheatItem(player, 0, 1, 27)
 	elseif result == 6 ;spell
 		Proteus_CheatSpell(player, 0, 1, 22, ZZProteusSkyUIMenu)
 	elseif result == 7 ;perk
@@ -6090,9 +6090,9 @@ Function Proteus_NewCharacter()
 	;select starting outfit, weapons, and spells
 	Debug.MessageBox("You will now select/edit: \nStarting Armor\nStarting Weapon\nAppearance\nStarting Location")
 	Utility.Wait(0.1)
-	Proteus_CheatItem(0, 1, 26) ;armor search	
+	Proteus_CheatItem(player, 0, 1, 26) ;armor search	
 	Utility.Wait(0.1)
-	Proteus_CheatItem(0, 1, 41) ;weapon search
+	Proteus_CheatItem(player, 0, 1, 41) ;weapon search
 
 	Utility.Wait(0.1)
 	Proteus_CheatSpell(player, 0, 1, 22, ZZProteusSkyUIMenu)
@@ -6455,10 +6455,7 @@ endFunction
 
 
 
-
-
-
-Function Proteus_CheatItem(int startingPoint, int currentPage, int typeCode) ;option 0 = cheat, 1 = reset
+Function Proteus_CheatItem(Actor target, int startingPoint, int currentPage, int typeCode) ;option 0 = cheat, 1 = reset
     Debug.Notification("Item menu loading...may take a few seconds!")
     Form[] allGameItems = ProteusGetAllByFormId(typeCode) ;get all Items in game and from mods
 
@@ -6495,8 +6492,9 @@ Function Proteus_CheatItem(int startingPoint, int currentPage, int typeCode) ;op
             listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
-            if(i == 127)
+			if(i == 127 || allGameItems[startingPoint] == NONE)
                 listMenuBase.AddEntryItem("[Continue to Page " + Proteus_Round(currentPage + 1, 0) as String + " of " + Proteus_Round(numPages, 0) as String + "]")
+                i = 128
             endIf
         endwhile
     EndIf
@@ -6509,50 +6507,50 @@ Function Proteus_CheatItem(int startingPoint, int currentPage, int typeCode) ;op
         if (lengthSearchTerm > 0)   
             int itemCount = ProteusGetItemCount(searchTerm, typeCode)
             Form[] foundItems = ProteusGetItemBySearch(searchTerm, typeCode)
-            Proteus_CheatItemSearch(foundItems, 0, 1, typeCode)
+            Proteus_CheatItemSearch(target, foundItems, 0, 1, typeCode)
         else
             Debug.Notification("Invalid length search term.")
         endIf
 
     elseif result == 127 ;next page option
         currentPage += 1
-        Proteus_CheatItem(startingPoint, currentPage, typeCode)
+        Proteus_CheatItem(target, startingPoint, currentPage, typeCode)
     elseif(result > 0 && result != 127)
         if(startingPoint > 127)
             Form selectedItem = allGameItems[startingPointInitial + result - 2]
 			Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?") as Int
 			Utility.Wait(0.1)
 			if (itemAmount > 0)   
-				player.AddItem(selectedItem, itemAmount,  true)
+				target.AddItem(selectedItem, itemAmount,  true)
 				Debug.Notification(Proteus_Round(itemAmount, 0) + " " + ProteusGetFormEditorID(selectedItem) + " added to inventory.")
 				if(typeCode == 41 || typeCode == 26 || typeCode == 42)
 					Utility.Wait(0.1)
-					player.EquipItem(selectedItem)
+					target.EquipItem(selectedItem)
 				endIf
 			elseif itemAmount != 0
 				Debug.Notification("Invalid amount entered.")
 			endIf
-            Proteus_CheatItem(startingPointInitial, currentPage, typeCode)
+            Proteus_CheatItem(target, startingPointInitial, currentPage, typeCode)
         Else
             Form selectedItem = allGameItems[result - 2]
 			Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?") as Int
 			Utility.Wait(0.1)
 			if (itemAmount > 0)   
-				player.AddItem(selectedItem, itemAmount,  true)
+				target.AddItem(selectedItem, itemAmount,  true)
 				Debug.Notification(Proteus_Round(itemAmount, 0) + " " + ProteusGetFormEditorID(selectedItem) + " added to inventory.")
 				if(typeCode == 41 || typeCode == 26 || typeCode == 42)
 					Utility.Wait(0.1)
-					player.EquipItem(selectedItem)
+					target.EquipItem(selectedItem)
 				endIf
 			elseif itemAmount != 0
 				Debug.Notification("Invalid amount entered.")
 			endIf
-            Proteus_CheatItem(startingPointInitial, currentPage, typeCode)
+            Proteus_CheatItem(target, startingPointInitial, currentPage, typeCode)
         endIf
     endIf
 EndFunction
 
-Function Proteus_CheatItemSearch(Form[] foundItems, int startingPoint, int currentPage, int typeCode) ;option 0 = cheat, 1 = reset
+Function Proteus_CheatItemSearch(Actor target, Form[] foundItems, int startingPoint, int currentPage, int typeCode) ;option 0 = cheat, 1 = reset
     Debug.Notification("Item menu loading...may take a few seconds!")
     Form[] allGameItems = foundItems ;get all Items in game and from mods
 
@@ -6589,8 +6587,9 @@ Function Proteus_CheatItemSearch(Form[] foundItems, int startingPoint, int curre
             listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
-            if(i == 127)
+			if(i == 127 || allGameItems[startingPoint] == NONE)
                 listMenuBase.AddEntryItem("[Continue to Page " + Proteus_Round(currentPage + 1, 0) as String + " of " + Proteus_Round(numPages, 0) as String + "]")
+                i = 128
             endIf
         endwhile
     EndIf
@@ -6603,44 +6602,46 @@ Function Proteus_CheatItemSearch(Form[] foundItems, int startingPoint, int curre
         if (lengthSearchTerm > 0)   
             int itemCount = ProteusGetItemCount(searchTerm, typeCode)
             Form[] foundItems2 = ProteusGetItemBySearch(searchTerm, typeCode)
-            Proteus_CheatItemSearch(foundItems2, 0, 1, typeCode)
+            Proteus_CheatItemSearch(target, foundItems2, 0, 1, typeCode)
         else
             Debug.Notification("Invalid length search term.")
         endIf
     elseif result == 127 ;next page option
         currentPage += 1
-        Proteus_CheatItemSearch(foundItems, startingPoint, currentPage, typeCode)
+        Proteus_CheatItemSearch(target, foundItems, startingPoint, currentPage, typeCode)
     elseif(result > 0 && result != 127)
         if(startingPoint > 127)
             Form selectedItem = allGameItems[startingPointInitial + result - 2]
 			Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?") as Int
 			Utility.Wait(0.1)
 			if (itemAmount > 0)   
-				player.AddItem(selectedItem, itemAmount,  true)
+				target.AddItem(selectedItem, itemAmount,  true)
 				Debug.Notification(Proteus_Round(itemAmount, 0) + " " + ProteusGetFormEditorID(selectedItem) + " added to inventory.")
 				if(typeCode == 41 || typeCode == 26 || typeCode == 42)
 					Utility.Wait(0.1)
-					player.EquipItem(selectedItem)
+					target.EquipItem(selectedItem)
 				endIf
 			elseif itemAmount != 0
 				Debug.Notification("Invalid amount entered.")
 			endIf
-            Proteus_CheatItemSearch(foundItems, startingPointInitial, currentPage, typeCode)
+            Proteus_CheatItemSearch(target, foundItems, startingPointInitial, currentPage, typeCode)
         Else
             Form selectedItem = foundItems[result - 2]
 			Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?") as Int
 			Utility.Wait(0.1)
 			if (itemAmount > 0)   
-				player.AddItem(selectedItem, itemAmount,  true)
+				target.AddItem(selectedItem, itemAmount,  true)
 				Debug.Notification(Proteus_Round(itemAmount, 0) + " " + ProteusGetFormEditorID(selectedItem) + " added to inventory.")
 				if(typeCode == 41 || typeCode == 26 || typeCode == 42)
 					Utility.Wait(0.1)
-					player.EquipItem(selectedItem)
+					target.EquipItem(selectedItem)
 				endIf
 			elseif itemAmount != 0
 				Debug.Notification("Invalid amount entered.")
 			endIf
-            Proteus_CheatItemSearch(foundItems, startingPointInitial, currentPage, typeCode)
+            Proteus_CheatItemSearch(target, foundItems, startingPointInitial, currentPage, typeCode)
         endIf
     endIf
 EndFunction
+
+

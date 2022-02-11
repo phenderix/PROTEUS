@@ -16,6 +16,9 @@ String Function GetFormMenuName(Form theForm) global
     return name
 EndFunction
 
+
+
+
 Function Proteus_CheatSpell(Actor targetActor, int startingPoint, int currentPage, int typeCode, Quest ZZProteusSkyUIMenu) global ;option 0 = cheat, 1 = reset
     Debug.Notification("Spell menu loading...may take a few seconds!")
     Form[] allGameSpells = ProteusGetAllByFormId(typeCode) ;get all Spells in game and from mods
@@ -30,13 +33,14 @@ Function Proteus_CheatSpell(Actor targetActor, int startingPoint, int currentPag
         i+=1
         listMenuBase.AddEntryItem("[Search Spells]")
         i+=1
-        while startingPoint <= allGameSpells.Length && i < 128
+        while startingPoint <= allGameSpells.Length && i < 128 && allGameSpells[startingPoint] != NONE
 			String name = GetFormMenuName(allGameSpells[startingPoint])
             listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
-            if(i == 127)
+            if(i == 127 || allGameSpells[startingPoint] == NONE)
                 listMenuBase.AddEntryItem("[Continue to Page " + Proteus_Round(currentPage + 1, 0) as String + " of " + Proteus_Round(numPages, 0) as String + "]")
+                i = 128
             endIf
         endwhile
     EndIf
@@ -84,13 +88,14 @@ Function Proteus_CheatSpellSearch(Actor targetActor, Form[] foundSpells, int sta
         i+=1
         listMenuBase.AddEntryItem("[Search Spells]")
         i+=1
-        while startingPoint <= allGameSpells.Length && i < 128
+        while startingPoint <= allGameSpells.Length && i < 128 && allGameSpells[startingPoint] != NONE
             String name = GetFormMenuName(allGameSpells[startingPoint])
             listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
-            if(i == 127)
+            if(i == 127 || allGameSpells[startingPoint] == NONE)
                 listMenuBase.AddEntryItem("[Continue to Page " + Proteus_Round(currentPage + 1, 0) as String + " of " + Proteus_Round(numPages, 0) as String + "]")
+                i = 128
             endIf
         endwhile
     EndIf
@@ -137,13 +142,14 @@ Function Proteus_CheatPerk(Actor targetActor, int startingPoint, int currentPage
         i+=1
         listMenuBase.AddEntryItem("[Search Perks]")
         i+=1
-        while startingPoint <= allGamePerks.Length && i < 128
+        while startingPoint <= allGamePerks.Length && i < 128 && allGamePerks[startingPoint] != NONE
             String name = GetFormMenuName(allGamePerks[startingPoint])
             listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
-            if(i == 127)
+            if(i == 127 || allGamePerks[startingPoint] == NONE)
                 listMenuBase.AddEntryItem("[Continue to Page " + Proteus_Round(currentPage + 1, 0) as String + " of " + Proteus_Round(numPages, 0) as String + "]")
+                i = 128
             endIf
         endwhile
     EndIf
@@ -193,13 +199,14 @@ Function Proteus_CheatPerkSearch(Actor targetActor, Form[] foundPerks, int start
         i+=1
         listMenuBase.AddEntryItem("[Search Perks]")
         i+=1
-        while startingPoint <= allGamePerks.Length && i < 128
+        while startingPoint <= allGamePerks.Length && i < 128 && allGamePerks[startingPoint] != NONE
             String name = GetFormMenuName(allGamePerks[startingPoint])
             listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
-            if(i == 127)
+            if(i == 127 || allGamePerks[startingPoint] == NONE)
                 listMenuBase.AddEntryItem("[Continue to Page " + Proteus_Round(currentPage + 1, 0) as String + " of " + Proteus_Round(numPages, 0) as String + "]")
+                i = 128
             endIf
         endwhile
     EndIf
@@ -234,9 +241,6 @@ Function Proteus_CheatPerkSearch(Actor targetActor, Form[] foundPerks, int start
     endIf
 EndFunction
 
-
-
-
 Function Proteus_CheatShout(Actor targetActor, int startingPoint, int currentPage, int typeCode, Quest ZZProteusSkyUIMenu) global ;option 0 = cheat, 1 = reset
     Debug.Notification("Shout menu loading...may take a few seconds!")
     Form[] allGameShouts = ProteusGetAllByFormId(typeCode) ;get all Shouts in game and from mods
@@ -251,13 +255,14 @@ Function Proteus_CheatShout(Actor targetActor, int startingPoint, int currentPag
         i+=1
         listMenuBase.AddEntryItem("[Search Shouts]")
         i+=1
-        while startingPoint <= allGameShouts.Length && i < 128
+        while startingPoint <= allGameShouts.Length && i < 128 && allGameShouts[startingPoint] != NONE
             String name = GetFormMenuName(allGameShouts[startingPoint])
             listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
-            if(i == 127)
+            if(i == 127 || allGameShouts[startingPoint] == NONE)
                 listMenuBase.AddEntryItem("[Continue to Page " + Proteus_Round(currentPage + 1, 0) as String + " of " + Proteus_Round(numPages, 0) as String + "]")
+                i = 128
             endIf
         endwhile
     EndIf
@@ -319,13 +324,14 @@ Function Proteus_CheatShoutSearch(Actor targetActor, Form[] foundShouts, int sta
         i+=1
         listMenuBase.AddEntryItem("[Search Shouts]")
         i+=1
-        while startingPoint <= allGameShouts.Length && i < 128
+        while startingPoint <= allGameShouts.Length && i < 128 && allGameShouts[startingPoint] != NONE
             String name = GetFormMenuName(allGameShouts[startingPoint])
             listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
-            if(i == 127)
+            if(i == 127 || allGameShouts[startingPoint] == NONE)
                 listMenuBase.AddEntryItem("[Continue to Page " + Proteus_Round(currentPage + 1, 0) as String + " of " + Proteus_Round(numPages, 0) as String + "]")
+                i = 128
             endIf
         endwhile
     EndIf

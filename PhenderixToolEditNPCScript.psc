@@ -3112,7 +3112,7 @@ Function Proteus_CheatOutfit(Actor target, int startingPoint, int currentPage) ;
         i+=1
         listMenuBase.AddEntryItem("[Search Outfits]")
         i+=1
-        while startingPoint <= allGameOutfits.Length && i < 128
+        while startingPoint <= allGameOutfits.Length && i < 128  && allGameOutfits[startingPoint] != NONE
 			String name = ProteusGetFormEditorID(allGameOutfits[startingPoint])
 			if(name == "")
 				name = allGameOutfits[startingPoint].GetName()
@@ -3125,7 +3125,8 @@ Function Proteus_CheatOutfit(Actor target, int startingPoint, int currentPage) ;
             startingPoint += 1
             if(i == 127)
                 listMenuBase.AddEntryItem("[Continue to Page " + Proteus_Round(currentPage + 1, 0) as String + " of " + Proteus_Round(numPages, 0) as String + "]")
-            endIf
+				i += 1
+			endIf
         endwhile
     EndIf
     listMenuBase.OpenMenu()
@@ -3135,7 +3136,7 @@ Function Proteus_CheatOutfit(Actor target, int startingPoint, int currentPage) ;
         Utility.Wait(0.1)
         Int lengthSearchTerm = StringUtil.GetLength(searchTerm)
         if (lengthSearchTerm > 0)   
-            ;int itemCount = ProteusDLLUtils.ProteusGetItemCount(searchTerm, 124)
+            int itemCount = ProteusDLLUtils.ProteusGetItemCount(searchTerm, 124)
             Form[] foundItems = ProteusDLLUtils.ProteusGetItemEditorIdBySearch(searchTerm, 124)
             Proteus_CheatOutfitSearch(target, foundItems, 0, 1)
         else
@@ -3170,7 +3171,7 @@ Function Proteus_CheatOutfitSearch(Actor target, Form[] foundItems, int starting
         i+=1
         listMenuBase.AddEntryItem("[Search Outfits]")
         i+=1
-        while startingPoint <= allGameOutfits.Length && i < 128
+        while startingPoint <= allGameOutfits.Length && i < 128 && allGameOutfits[startingPoint] != NONE
 			String name = ProteusGetFormEditorID(allGameOutfits[startingPoint])
 			if(name == "")
 				name = allGameOutfits[startingPoint].GetName()
@@ -3183,7 +3184,8 @@ Function Proteus_CheatOutfitSearch(Actor target, Form[] foundItems, int starting
             startingPoint += 1
             if(i == 127)
                 listMenuBase.AddEntryItem("[Continue to Page " + Proteus_Round(currentPage + 1, 0) as String + " of " + Proteus_Round(numPages, 0) as String + "]")
-            endIf
+				i += 1
+			endIf
         endwhile
     EndIf
     listMenuBase.OpenMenu()
@@ -3231,12 +3233,13 @@ Function Proteus_NPCVoiceTypeExhaustive(Actor target, int startingPoint, int cur
         i+=1
         listMenuBase.AddEntryItem("[Search VT]")
         i+=1
-        while startingPoint <= allGameVT.Length && i < 128
+        while startingPoint <= allGameVT.Length && i < 128 && allGameVT[startingPoint] != NONE
             listMenuBase.AddEntryItem(ProteusGetFormEditorID(allGameVT[startingPoint]))
             i += 1
             startingPoint += 1
-            if(i == 127)
+			if(i == 127 || allGameVT[startingPoint] == NONE)
                 listMenuBase.AddEntryItem("[Continue to Page " + Proteus_Round(currentPage + 1, 0) as String + " of " + Proteus_Round(numPages, 0) as String + "]")
+                i = 128
             endIf
         endwhile
     EndIf
@@ -3289,7 +3292,7 @@ Function Proteus_NPCVoiceTypeExhaustiveSearch(Actor target, Form[] foundItems, i
         i+=1
         listMenuBase.AddEntryItem("[Search VT]")
         i+=1
-        while startingPoint <= allGameVT.Length && i < 128
+        while startingPoint <= allGameVT.Length && i < 128 && allGameVT[startingPoint] != NONE
 			String name = ProteusGetFormEditorID(allGameVT[startingPoint])
 			if(name == "")
 				name = allGameVT[startingPoint].GetName()
@@ -3300,8 +3303,9 @@ Function Proteus_NPCVoiceTypeExhaustiveSearch(Actor target, Form[] foundItems, i
             listMenuBase.AddEntryItem(name)
             i += 1
             startingPoint += 1
-            if(i == 127)
+			if(i == 127 || allGameVT[startingPoint] == NONE)
                 listMenuBase.AddEntryItem("[Continue to Page " + Proteus_Round(currentPage + 1, 0) as String + " of " + Proteus_Round(numPages, 0) as String + "]")
+                i = 128
             endIf
         endwhile
     EndIf
