@@ -241,6 +241,7 @@ Bool edmrActive ;Elemental Destruction Magic Redux
 Bool colorfulMagicActive ;Colorful Magic by 184Gesu SE
 Bool addItemsActive ;AddItemMenu - Ultimate Mod Explorer
 Bool vokriinatorActive ;Vokriinator Black
+Bool cgoActive ;Combat gameplay overhaul
 
 ;-- Functions ---------------------------------------
 function OnEffectStart(Actor akplayer, Actor akCaster)
@@ -594,6 +595,7 @@ Function Proteus_CheckActiveMods()
 	colorfulMagicActive = false
 	addItemsActive = false
 	vokriinatorActive = false
+	cgoActive = false
 
 	;------------------------------------------------------------------------------------------------------
 	;check for mods critical to running Project Proteus
@@ -628,6 +630,11 @@ Function Proteus_CheckActiveMods()
 		addItemsActive = true
 	endIf
 
+	targetModIndex = Game.GetModByName("DSerCombatGameplayOverhaul.esp")
+	if TargetModIndex != 255
+		cgoActive = true
+	endIf
+	
 	;------------------------------------------------------------------------------------------------------
 	;custom perk trees (that use Custom Skills Framework)
 	targetModIndex = Game.GetModByName("Haemophilia.esp")
@@ -2686,7 +2693,7 @@ function Proteus_SaveCharacterAppearance(String name, Actor target)
 	Proteus_SavePlayerRace(target, name)
 	SaveCharacter(name)
 	SaveCharacterPreset(target, name)
-	ExportHead(name) ;new in v6
+	;ExportHead(name) ;new in v6
 	Proteus_SavePlayerPreset(target, name) ;saves preset name to then load at the start of the game
 
 	;create backup jslot as well
@@ -3531,12 +3538,25 @@ Function Proteus_EquipItems(String preset, Actor target)
 			String substringTest = StringUtil.Substring(ItemFormKey, StringUtil.GetLength(ItemFormKey) - 1, 1)
 			if(valueType == 41)
 				if(substringTest == "L")
-					target.EquipItemEx(value, 2, false, true)
+					if(cgoActive == false)
+						target.EquipItemEx(value, 2, false, true)
+					else
+						target.EquipItem(value)
+					endIf
 				elseif(substringTest == "R")
-					target.EquipItemEx(value, 1, false, true)
+					if(cgoActive == false)
+						target.EquipItemEx(value, 1, false, true)
+					else
+						target.EquipItem(value)
+					endIf
 				elseif(substringTest == "B")
-					target.EquipItemEx(value, 1, false, true)
-					target.EquipItemEx(value, 2, false, true)
+					if(cgoActive == false)
+						target.EquipItem(value)
+					else
+						target.EquipItemEx(value, 1, false, true)
+						target.EquipItemEx(value, 2, false, true)
+					endIf
+
 				EndIf
 			else
 				target.EquipItem(value, false, true)	
@@ -3590,12 +3610,25 @@ Function Proteus_LoadItems3(String presetName, Actor target, int counter)
 		while(player.GetItemCount(value) < 0)
 		endWhile
 		if StringUtil.Find(ItemFormKey, "ProteusHandL", 0) > 0
-			target.EquipItemEx(value, 2)
+			if(cgoActive == false)
+				target.EquipItemEx(value, 2, false, true)
+			else
+				target.EquipItem(value)
+			endIf
 		elseif StringUtil.Find(ItemFormKey, "ProteusHandR", 0) > 0
-			target.EquipItemEx(value, 1)
+			if(cgoActive == false)
+				target.EquipItemEx(value, 1, false, true)
+			else
+				target.EquipItem(value)
+			endIf
 		elseif StringUtil.Find(ItemFormKey, "ProteusHandB", 0) > 0
-			target.EquipItemEx(value, 1)
-			target.EquipItemEx(value, 2)
+			if(cgoActive == false)
+				target.EquipItem(value)
+			else
+				target.EquipItemEx(value, 1, false, true)
+				target.EquipItemEx(value, 2, false, true)
+			endIf
+
 		else
 			if(target.IsEquipped(value))
 			else
