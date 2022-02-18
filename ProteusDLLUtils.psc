@@ -84,6 +84,10 @@ Form[] Function ProteusAddAllItemsToArray(ObjectReference akRef, bool abNoEquipp
 ; @return Returns 0 if there is an error.
 Form[] Function ProteusGetAllByFormId(Int formType) Global Native 
 
+; @brief Returns all the items from a form type from a specific mod with a cache.
+; @return Returns 0 if there is an error.
+Form[] Function ProteusGetAllInModByFormId(Int formType, String asModName) Global Native 
+
 ; @brief Sets the sex onto the target actor. 1 == female. 0 == male Checks if it is already the sex before setting it. Does nothing if its the same sex.
 ; @return Returns 0 if there is an error.
 Int Function SetSex(Actor actor, Int sex) Global Native 
@@ -95,6 +99,10 @@ Int Function SetLevel(Actor actor, Int level) Global Native
 ; @brief Shows the racemenu
 ; @return Returns 0 if there is an error.
 Int Function ShowRaceMenu() Global Native 
+
+; @brief Returns true or false if the form is part of a mod
+; @return Returns 0 if there is an error.
+Faction[] Function ProteusGetAllFactions(Actor actor) global native
 
 ; @brief Favorites an item / spell / shout in the inventory
 ; @return Returns 0 if there is an error.
@@ -127,3 +135,4 @@ Int Function ProteusSetHairColor(Actor akActor, ColorForm akColor) global native
 ; @brief Returns true or false if the form is part of a mod
 ; @return Returns 0 if there is an error.
 bool Function ProteusIsFormInMod(Form akForm, String asModName) global native
+
