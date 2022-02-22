@@ -511,7 +511,7 @@ Function Proteus_CheatItem(Quest ZZProteusSkyUIMenu, Actor target, int startingP
     elseif(result > 0 && result != 127)
         if(startingPoint > 127)
             Form selectedItem = allGameItems[startingPointInitial + result - 4]
-            Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?") as Int
+            Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?", "1") as Int
             Utility.Wait(0.1)
             if (itemAmount > 0)   
                 target.AddItem(selectedItem, itemAmount,  true)
@@ -527,7 +527,7 @@ Function Proteus_CheatItem(Quest ZZProteusSkyUIMenu, Actor target, int startingP
             Proteus_CheatItem(ZZProteusSkyUIMenu, target, startingPointInitial, currentPage, typeCode)
         Else
             Form selectedItem = allGameItems[result - 4]
-			Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?") as Int
+			Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?", "1") as Int
 			Utility.Wait(0.1)
 			if (itemAmount > 0)   
 				target.AddItem(selectedItem, itemAmount,  true)
@@ -604,7 +604,7 @@ Function Proteus_CheatItemSearch(Quest ZZProteusSkyUIMenu, Actor target, Form[] 
     elseif(result > 0 && result != 127)
         if(startingPoint > 127)
             Form selectedItem = allGameItems[startingPointInitial + result - 4]
-			Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?") as Int
+			Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?", "1") as Int
 			Utility.Wait(0.1)
 			if (itemAmount > 0)   
 				target.AddItem(selectedItem, itemAmount,  true)
@@ -620,7 +620,7 @@ Function Proteus_CheatItemSearch(Quest ZZProteusSkyUIMenu, Actor target, Form[] 
             Proteus_CheatItemSearch(ZZProteusSkyUIMenu, target, foundItems, startingPointInitial, currentPage, typeCode)
         Else
             Form selectedItem = foundItems[result - 4]
-			Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?") as Int
+			Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?", "1") as Int
 			Utility.Wait(0.1)
 			if (itemAmount > 0)   
 				target.AddItem(selectedItem, itemAmount,  true)
@@ -1011,7 +1011,7 @@ Function Proteus_ModExplorer_Dive(Quest ZZProteusSkyUIMenu, Actor target, String
         if(startingPoint > 127)
 			Form selectedItem = itemArray[startingPointInitial + result - 5]
             if(typeCode != 92 && typeCode != 22 && typeCode != 119)
-                Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?") as Int
+                Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?", "1") as Int
                 Utility.Wait(0.1)
                 if (itemAmount > 0)   
                     target.AddItem(selectedItem, itemAmount, true)
@@ -1043,7 +1043,7 @@ Function Proteus_ModExplorer_Dive(Quest ZZProteusSkyUIMenu, Actor target, String
         Else
 			Form selectedItem = itemArray[result - 5]
             if(typeCode != 92 && typeCode != 22 && typeCode != 119)
-                Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?") as Int
+                Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?", "1") as Int
                 Utility.Wait(0.1)
                 if (itemAmount > 0)   
                     target.AddItem(selectedItem, itemAmount, true)
@@ -1239,7 +1239,7 @@ Function Proteus_ModExplorer_Dive_Search(Quest ZZProteusSkyUIMenu,Actor target, 
         if(startingPoint > 127)
             Form selectedItem = itemArray[startingPointInitial + result - 5]
             if(typeCode != 92 && typeCode != 22 && typeCode != 119)
-                Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?") as Int
+                Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?", "1") as Int
                 Utility.Wait(0.1)
                 if (itemAmount > 0)   
                     target.AddItem(selectedItem, itemAmount, true)
@@ -1271,7 +1271,7 @@ Function Proteus_ModExplorer_Dive_Search(Quest ZZProteusSkyUIMenu,Actor target, 
         Else
             Form selectedItem = itemArray[result - 5]
             if(typeCode != 92 && typeCode != 22 && typeCode != 119)
-                Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?") as Int
+                Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?", "1") as Int
                 Utility.Wait(0.1)
                 if (itemAmount > 0)   
                     target.AddItem(selectedItem, itemAmount, true)
@@ -1389,14 +1389,14 @@ function PlayerCheats(Quest ZZProteusSkyUIMenu, Actor target) global
 		Utility.Wait(0.1)
 		Proteus_CheatShout(ZZProteusSkyUIMenu, target, 0, 1, 119)
 	elseif result == 12 ;perk points
-		String amount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many perk points?")
+		String amount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many perk points?", "1")
 		if(amount as Int > 0)
 			Game.AddPerkPoints(amount as Int)
 			Debug.Notification("Player gained " + Proteus_Round(amount as Int, 0) + " perk point(s).")
 		endIf
 		playerCheats(ZZProteusSkyUIMenu, target)
 	elseIf result == 13 ;dragon souls
-		String amount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many dragon souls?")
+		String amount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many dragon souls?", "1")
 		if(amount as Int > 0)
 			target.modav("dragonsouls", amount as Int)
 			Debug.Notification("Player gained " + Proteus_Round(amount as Int, 0) + " dragon soul(s).")
