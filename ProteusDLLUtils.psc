@@ -70,11 +70,11 @@ int Function ProteusGetItemCount(String containsText, Int formType) Global Nativ
 
 ; @brief Returns all the items that contain the text (Case Insensitive) by formtype.
 ; @return Returns 0 if there is an error.
-Form[] Function ProteusGetItemBySearch(String containsText, Int formType) Global Native 
+Form[] Function ProteusGetItemBySearch(String containsText, Int formType, String asModName) Global Native 
 
 ; @brief Returns all the items that contain the text by editor id (Case Insensitive) by formtype.
 ; @return Returns 0 if there is an error.
-Form[] Function ProteusGetItemEditorIdBySearch(String containsText, Int formType) Global Native 
+Form[] Function ProteusGetItemEditorIdBySearch(String containsText, Int formType, String asModName) Global Native 
 
 ; @brief Returns a list of items on the Object that match the parameters
 ; @return Returns an empty list if there is an error.
