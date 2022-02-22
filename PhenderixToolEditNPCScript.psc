@@ -454,9 +454,9 @@ Function Proteus_NPCMagicFunction(Actor gTarget)
 		magicMenu.OpenMenu(gTarget)
 		magicMenu = None
 	elseif result == 1
-		Proteus_CheatSpell(gTarget, 0, 1, 22, ZZProteusSkyUIMenu)
+		Proteus_CheatSpell(ZZProteusSkyUIMenu, gTarget, 0, 1, 22)
 	elseif result == 2
-		Proteus_CheatPerk(gTarget, 0, 1, 92, ZZProteusSkyUIMenu)
+		Proteus_CheatPerk(ZZProteusSkyUIMenu, gTarget, 0, 1, 92)
 	elseif result == 3 ;back
 		Proteus_NPCMainMenu(gTarget)
 	elseif result == 4 ;exit
@@ -3102,7 +3102,7 @@ Function Proteus_CheatOutfit(Actor target, int startingPoint, int currentPage) ;
     Debug.Notification("Outfit menu loading...may take a few seconds!")
     Form[] allGameOutfits = ProteusGetAllByFormId(124) ;get all Outfits in game and from mods
 
-    int numPages = (allGameOutfits.Length / 127) as Int
+    int numPages = Math.Ceiling(allGameOutfits.Length / 127 as Float) as Int
     int startingPointInitial = startingPoint
 
     UIListMenu listMenuBase = UIExtensions.GetMenu("UIListMenu") as UIListMenu
@@ -3137,7 +3137,7 @@ Function Proteus_CheatOutfit(Actor target, int startingPoint, int currentPage) ;
         Int lengthSearchTerm = StringUtil.GetLength(searchTerm)
         if (lengthSearchTerm > 0)   
             int itemCount = ProteusDLLUtils.ProteusGetItemCount(searchTerm, 124)
-            Form[] foundItems = ProteusDLLUtils.ProteusGetItemEditorIdBySearch(searchTerm, 124)
+            Form[] foundItems = ProteusDLLUtils.ProteusGetItemEditorIdBySearch(searchTerm, 124, "")
             Proteus_CheatOutfitSearch(target, foundItems, 0, 1)
         else
             Debug.Notification("Invalid length search term.")
@@ -3161,7 +3161,7 @@ Function Proteus_CheatOutfitSearch(Actor target, Form[] foundItems, int starting
     Debug.Notification("Outfit menu loading...may take a few seconds!")
     Form[] allGameOutfits = foundItems ;get all Outfits in game and from mods
 
-    int numPages = (allGameOutfits.Length / 127) as Int
+    int numPages = Math.Ceiling(allGameOutfits.Length / 127 as Float) as Int
     int startingPointInitial = startingPoint
 
     UIListMenu listMenuBase = UIExtensions.GetMenu("UIListMenu") as UIListMenu
@@ -3196,7 +3196,7 @@ Function Proteus_CheatOutfitSearch(Actor target, Form[] foundItems, int starting
         Int lengthSearchTerm = StringUtil.GetLength(searchTerm)
         if (lengthSearchTerm > 0)   
            ;int itemCount = ProteusDLLUtils.ProteusGetItemCount(searchTerm, 124)
-            Form[] foundItems2 = ProteusDLLUtils.ProteusGetItemEditorIdBySearch(searchTerm, 124)
+            Form[] foundItems2 = ProteusDLLUtils.ProteusGetItemEditorIdBySearch(searchTerm, 124, "")
             Proteus_CheatOutfitSearch(target, foundItems2, 0, 1)
         else
             Debug.Notification("Invalid length search term.")
@@ -3223,7 +3223,7 @@ Function Proteus_NPCVoiceTypeExhaustive(Actor target, int startingPoint, int cur
     Debug.Notification("Voice Type menu loading...may take a few seconds!")
     Form[] allGameVT = ProteusGetAllByFormId(98) ;get all Outfits in game and from mods 
 
-    int numPages = (allGameVT.Length / 127) as Int
+    int numPages = Math.Ceiling(allGameVT.Length / 127 as Float) as Int
     int startingPointInitial = startingPoint
 
     UIListMenu listMenuBase = UIExtensions.GetMenu("UIListMenu") as UIListMenu
@@ -3250,7 +3250,7 @@ Function Proteus_NPCVoiceTypeExhaustive(Actor target, int startingPoint, int cur
         Utility.Wait(0.1)
         Int lengthSearchTerm = StringUtil.GetLength(searchTerm)
         if (lengthSearchTerm > 0)   
-            Form[] foundItems = ProteusDLLUtils.ProteusGetItemEditorIdBySearch(searchTerm, 98)
+            Form[] foundItems = ProteusDLLUtils.ProteusGetItemEditorIdBySearch(searchTerm, 98, "")
             Proteus_NPCVoiceTypeExhaustiveSearch(target, foundItems, 0, 1)
         else
             Debug.Notification("Invalid length search term.")
@@ -3282,7 +3282,7 @@ Function Proteus_NPCVoiceTypeExhaustiveSearch(Actor target, Form[] foundItems, i
     Debug.Notification("Voice Type menu loading...may take a few seconds!")
     Form[] allGameVT = foundItems ;get all Outfits in game and from mods
 
-    int numPages = (allGameVT.Length / 127) as Int
+    int numPages = Math.Ceiling(allGameVT.Length / 127 as Float) as Int
     int startingPointInitial = startingPoint
 
     UIListMenu listMenuBase = UIExtensions.GetMenu("UIListMenu") as UIListMenu
@@ -3317,7 +3317,7 @@ Function Proteus_NPCVoiceTypeExhaustiveSearch(Actor target, Form[] foundItems, i
         Int lengthSearchTerm = StringUtil.GetLength(searchTerm)
         if (lengthSearchTerm > 0)   
            ;int itemCount = ProteusDLLUtils.ProteusGetItemCount(searchTerm, 124)
-            Form[] foundItems2 = ProteusDLLUtils.ProteusGetItemEditorIdBySearch(searchTerm, 98)
+            Form[] foundItems2 = ProteusDLLUtils.ProteusGetItemEditorIdBySearch(searchTerm, 98, "")
             Proteus_NPCVoiceTypeExhaustiveSearch(target, foundItems2, 0, 1)
         else
             Debug.Notification("Invalid length search term.")
