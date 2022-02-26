@@ -870,6 +870,8 @@ Function Proteus_ModExplorer_Dive(Quest ZZProteusSkyUIMenu, Actor target, String
             listMenuBase.AddEntryItem("[Add All Perks]")
         elseif typeCode == 119 ;shout
             listMenuBase.AddEntryItem("[Add All Shouts]")
+        elseif typeCode == 43
+            listMenuBase.AddEntryItem("[Spawn All NPCs]")
         else
             listMenuBase.AddEntryItem("[Add All to Inventory]")
         endIf
@@ -967,7 +969,7 @@ Function Proteus_ModExplorer_Dive(Quest ZZProteusSkyUIMenu, Actor target, String
         endIf
     elseif result == 2 ;add all
 		int j = 0
-        if(typeCode != 92 && typeCode != 22 && typeCode != 119)
+        if(typeCode != 92 && typeCode != 22 && typeCode != 119 && typeCode != 43)
             while j < itemArray.Length
                 target.AddItem(itemArray[j], 1, true)
                 j+=1
@@ -997,6 +999,12 @@ Function Proteus_ModExplorer_Dive(Quest ZZProteusSkyUIMenu, Actor target, String
                 endWhile
             endWhile
             Debug.Notification("All matching shouts added.")
+        elseif typeCode  == 43
+            while j < itemArray.Length
+                target.PlaceAtMe(itemArray[j] as Actor, 1)
+                j+=1
+            endWhile
+            Debug.Notification("All matching NPCs spawned.")
         endIf
 		Proteus_ModExplorer_Dive(ZZProteusSkyUIMenu, target, selectedMod, startingPointInitial, currentPage, typeCode, option)
 	elseif result == 3 ;back to mod list
@@ -1010,7 +1018,7 @@ Function Proteus_ModExplorer_Dive(Quest ZZProteusSkyUIMenu, Actor target, String
     elseif(result > 0 && result != 127)
         if(startingPoint > 127)
 			Form selectedItem = itemArray[startingPointInitial + result - 5]
-            if(typeCode != 92 && typeCode != 22 && typeCode != 119)
+            if(typeCode != 92 && typeCode != 22 && typeCode != 119 && typeCode != 43)
                 Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?", "1") as Int
                 Utility.Wait(0.1)
                 if (itemAmount > 0)   
@@ -1038,11 +1046,20 @@ Function Proteus_ModExplorer_Dive(Quest ZZProteusSkyUIMenu, Actor target, String
                     s+=1
                 endWhile
                 Debug.Notification(selectedItem.getName() + " added.")
+            elseif typeCode == 43
+                Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Spawn how many " + selectedItem.GetName() + "?", "1") as Int
+                Utility.Wait(0.1)
+                if (itemAmount > 0)   
+                    target.PlaceAtMe(selectedItem as Actor, itemAmount)
+                    Debug.Notification(selectedItem.GetName() + " spawned.")
+                else
+                    Debug.Notification("Invalid amount entered.")
+                endIf
             endIf
             Proteus_ModExplorer_Dive(ZZProteusSkyUIMenu, target, selectedMod, startingPointInitial, currentPage, typeCode, option)
         Else
 			Form selectedItem = itemArray[result - 5]
-            if(typeCode != 92 && typeCode != 22 && typeCode != 119)
+            if(typeCode != 92 && typeCode != 22 && typeCode != 119 && typeCode != 43)
                 Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?", "1") as Int
                 Utility.Wait(0.1)
                 if (itemAmount > 0)   
@@ -1070,7 +1087,17 @@ Function Proteus_ModExplorer_Dive(Quest ZZProteusSkyUIMenu, Actor target, String
                     s+=1
                 endWhile
                 Debug.Notification(selectedItem.getName() + " added.")
+            elseif typeCode == 43
+                Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Spawn how many " + selectedItem.GetName() + "?", "1") as Int
+                Utility.Wait(0.1)
+                if (itemAmount > 0)   
+                    target.PlaceAtMe(selectedItem as Actor, itemAmount)
+                    Debug.Notification(selectedItem.GetName() + " spawned.")
+                else
+                    Debug.Notification("Invalid amount entered.")
+                endIf
             endIf
+            
             Proteus_ModExplorer_Dive(ZZProteusSkyUIMenu, target, selectedMod, startingPointInitial, currentPage, typeCode, option)
         endIf
     endIf
@@ -1097,6 +1124,8 @@ Function Proteus_ModExplorer_Dive_Search(Quest ZZProteusSkyUIMenu,Actor target, 
             listMenuBase.AddEntryItem("[Add All Perks]")
         elseif typeCode == 119 ;shout
             listMenuBase.AddEntryItem("[Add All Shouts]")
+        elseif typeCode == 43
+            listMenuBase.AddEntryItem("[Spawn All NPCs]")
         else
             listMenuBase.AddEntryItem("[Add All to Inventory]")
         endIf        
@@ -1195,7 +1224,7 @@ Function Proteus_ModExplorer_Dive_Search(Quest ZZProteusSkyUIMenu,Actor target, 
         endIf
     elseif result == 2 ;add all items
 		int j = 0
-        if(typeCode != 92 && typeCode != 22 && typeCode != 119)
+        if(typeCode != 92 && typeCode != 22 && typeCode != 119 && typeCode != 43)
             while j < itemArray.Length
                 target.AddItem(itemArray[j], 1, true)
                 j+=1
@@ -1225,6 +1254,12 @@ Function Proteus_ModExplorer_Dive_Search(Quest ZZProteusSkyUIMenu,Actor target, 
                 endWhile
             endWhile
             Debug.Notification("All matching shouts added.")
+        elseif typeCode  == 43
+            while j < itemArray.Length
+                target.PlaceAtMe(itemArray[j] as Actor, 1)
+                j+=1
+            endWhile
+            Debug.Notification("All matching NPCs spawned.")
         endIf
 		Proteus_ModExplorer_Dive_Search(ZZProteusSkyUIMenu, target, itemArray, selectedMod, startingPointInitial, currentPage, typeCode, option, counterAll2)
 	elseif result == 3 ;back to mod list
@@ -1238,7 +1273,7 @@ Function Proteus_ModExplorer_Dive_Search(Quest ZZProteusSkyUIMenu,Actor target, 
     elseif(result > 0 && result != 127)
         if(startingPoint > 127)
             Form selectedItem = itemArray[startingPointInitial + result - 5]
-            if(typeCode != 92 && typeCode != 22 && typeCode != 119)
+            if(typeCode != 92 && typeCode != 22 && typeCode != 119 && typeCode != 43)
                 Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?", "1") as Int
                 Utility.Wait(0.1)
                 if (itemAmount > 0)   
@@ -1266,11 +1301,20 @@ Function Proteus_ModExplorer_Dive_Search(Quest ZZProteusSkyUIMenu,Actor target, 
                     s+=1
                 endWhile
                 Debug.Notification(selectedItem.getName() + " added.")
+            elseif typeCode == 43
+                Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Spawn how many " + selectedItem.GetName() + "?", "1") as Int
+                Utility.Wait(0.1)
+                if (itemAmount > 0)   
+                    target.PlaceAtMe(selectedItem as Actor, itemAmount)
+                    Debug.Notification(selectedItem.GetName() + " spawned.")
+                else
+                    Debug.Notification("Invalid amount entered.")
+                endIf
             endIf
             Proteus_ModExplorer_Dive_Search(ZZProteusSkyUIMenu, target, itemArray, selectedMod, 0, 1, typeCode, option, counterAll2)
         Else
             Form selectedItem = itemArray[result - 5]
-            if(typeCode != 92 && typeCode != 22 && typeCode != 119)
+            if(typeCode != 92 && typeCode != 22 && typeCode != 119 && typeCode != 43)
                 Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Add how many " + selectedItem.GetName() + "?", "1") as Int
                 Utility.Wait(0.1)
                 if (itemAmount > 0)   
@@ -1298,6 +1342,15 @@ Function Proteus_ModExplorer_Dive_Search(Quest ZZProteusSkyUIMenu,Actor target, 
                     s+=1
                 endWhile
                 Debug.Notification(selectedItem.getName() + " added.")
+            elseif typeCode == 43
+                Int itemAmount = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Spawn how many " + selectedItem.GetName() + "?", "1") as Int
+                Utility.Wait(0.1)
+                if (itemAmount > 0)   
+                    target.PlaceAtMe(selectedItem as Actor, itemAmount)
+                    Debug.Notification(selectedItem.GetName() + " spawned.")
+                else
+                    Debug.Notification("Invalid amount entered.")
+                endIf
             endIf
             Proteus_ModExplorer_Dive_Search(ZZProteusSkyUIMenu, target, itemArray, selectedMod, 0, 1, typeCode, option, counterAll2)
         endIf
@@ -1319,10 +1372,16 @@ String function Proteus_GetTypeString(Int typeCode) global
 		typeString = " Books"
 	elseif typeCode == 42
 		typeString = " Ammo"
+    elseif typeCode == 43
+        typeString = " NPCs"
 	elseif typeCode == 45
 		typeString = " Keys"
 	elseif typeCode == 46
 		typeString = " Potions"
+    elseif typeCode == 124
+        typeString = " Outfits"
+    elseif typeCode == 98
+        typeString = " VoiceTypes"
     else
         typeString = " Items"
 	endIf
@@ -1331,7 +1390,7 @@ endFunction
 
 
 function PlayerCheats(Quest ZZProteusSkyUIMenu, Actor target) global
-	String[] stringArray= new String[16]
+	String[] stringArray= new String[17]
 
 	stringArray[0] = " Mod Explorer (Items)"
 	stringArray[1] = " Add Weapon"
@@ -1347,12 +1406,13 @@ function PlayerCheats(Quest ZZProteusSkyUIMenu, Actor target) global
 	stringArray[11] = " Add Shout"
 	stringArray[12] = " Add Perk Point"
 	stringArray[13] = " Add Dragon Soul"
-	stringArray[14] = " Dispel Active Effects"
-	stringArray[15] = " [Exit Menu]"
+    stringArray[14] = " NPC Spawner"
+	stringArray[15] = " Dispel Active Effects"
+	stringArray[16] = " [Exit Menu]"
 
 	UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
 	if listMenu
-		int n = 16
+		int n = 17
 		int i = 0
 		while i < n
 			listMenu.AddEntryItem(stringArray[i])
@@ -1402,8 +1462,145 @@ function PlayerCheats(Quest ZZProteusSkyUIMenu, Actor target) global
 			Debug.Notification("Player gained " + Proteus_Round(amount as Int, 0) + " dragon soul(s).")
 		endIf
 		playerCheats(ZZProteusSkyUIMenu, target)
-	elseif result == 14 ;dispel
+    elseif result == 14 ;spawner
+        Proteus_Spawner(ZZProteusSkyUIMenu, target, 0, 1)
+	elseif result == 15 ;dispel
 		target.DispelAllSpells()
-	elseIf result == 15	;exit
+	elseIf result == 16	;exit
 	endIf
 endFunction
+
+
+
+
+
+
+
+
+
+Function Proteus_Spawner(Quest ZZProteusSkyUIMenu, Actor target, int startingPoint, int currentPage) global
+    Debug.Notification("Spawner menu loading...may take a few seconds!")
+    Form[] allGameForms = ProteusGetAllByFormId(43) ;get all NPCs in game and from mods
+
+	int numPages = Math.Ceiling(allGameForms.Length / 127 as Float) as Int
+    int startingPointInitial = startingPoint
+
+    UIListMenu listMenuBase = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+    if listMenuBase 
+        int i = 0
+        listMenuBase.AddEntryItem("[Quit Spawner]")
+        i+=1
+        listMenuBase.AddEntryItem("[Search NPCs]")
+        i+=1
+		listMenuBase.AddEntryItem("[Explore NPCs by Mod]")
+        i+=1
+        listMenuBase.AddEntryItem("[Back to Cheat Menu]")
+        i+=1
+        while startingPoint <= allGameForms.Length && i < 128
+			String name = GetFormMenuName(allGameForms[startingPoint])
+            listMenuBase.AddEntryItem(name)
+            i += 1
+            startingPoint += 1
+            if(i == 127)
+                listMenuBase.AddEntryItem("[Continue to Page " + Proteus_Round(currentPage + 1, 0) as String + " of " + Proteus_Round(numPages, 0) as String + "]")
+            endIf
+        endwhile
+    EndIf
+    listMenuBase.OpenMenu()
+    int result = listMenuBase.GetResultInt()
+    if result == 1 ;search option
+        String searchTerm = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Search for:")
+        Utility.Wait(0.1)
+        Int lengthSearchTerm = StringUtil.GetLength(searchTerm)
+        if (lengthSearchTerm > 0)   
+            Form[] foundItems = ProteusDLLUtils.ProteusGetItemBySearch(searchTerm, 43, "")
+            Proteus_SpawnerSearch(ZZProteusSkyUIMenu, target, foundItems, 0, 1)
+        else
+            Debug.Notification("Invalid length search term.")
+        endIf
+	elseif result == 2 ;explorer option
+		Proteus_ModExplorer(ZZProteusSkyUIMenu, target, 0, 1, 43, 0)
+    elseif result == 3 ;back option
+        allGameForms = NONE
+        PlayerCheats(ZZProteusSkyUIMenu, target)
+    elseif result == 127 ;next page option
+        currentPage += 1
+        Proteus_Spawner(ZZProteusSkyUIMenu, target, startingPoint, currentPage)
+    elseif(result > 0 && result != 127)
+        if(startingPoint > 127)
+            Form selectedForm = allGameForms[startingPointInitial + result - 4] as Form
+			String enteredNumber = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Spawn how many " + selectedForm.GetName() + "?", "1")
+			target.PlaceAtMe(selectedForm, enteredNumber as Int)
+            Proteus_Spawner(ZZProteusSkyUIMenu, target, startingPointInitial, currentPage)
+        Else
+            Form selectedForm = allGameForms[result - 4] as Form
+			String enteredNumber = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Spawn how many " + selectedForm.GetName() + "?", "1")
+			target.PlaceAtMe(selectedForm, enteredNumber as Int)
+            Proteus_Spawner(ZZProteusSkyUIMenu, target, startingPointInitial, currentPage)
+        endIf
+    endIf
+EndFunction
+
+Function Proteus_SpawnerSearch(Quest ZZProteusSkyUIMenu, Actor target, Form[] foundItems, int startingPoint, int currentPage) global
+    Debug.Notification("Spawner menu loading...may take a few seconds!")
+    Form[] allGameForms = foundItems ;get all Forms in game and from mods
+
+	int numPages = Math.Ceiling(allGameForms.Length / 127 as Float) as Int
+    int startingPointInitial = startingPoint
+
+    UIListMenu listMenuBase = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+    if listMenuBase 
+        int i = 0
+        listMenuBase.AddEntryItem("[Quit Spawner]")
+        i+=1
+        listMenuBase.AddEntryItem("[Search NPCs]")
+        i+=1
+		listMenuBase.AddEntryItem("[Explore NPCs by Mod]")
+        i+=1
+        listMenuBase.AddEntryItem("[Back to Cheat Menu]")
+        i+=1
+        while startingPoint <= allGameForms.Length && i < 128
+			String name = GetFormMenuName(allGameForms[startingPoint])
+
+            listMenuBase.AddEntryItem(name)
+            i += 1
+            startingPoint += 1
+            if(i == 127)
+                listMenuBase.AddEntryItem("[Continue to Page " + Proteus_Round(currentPage + 1, 0) as String + " of " + Proteus_Round(numPages, 0) as String + "]")
+            endIf
+        endwhile
+    EndIf
+    listMenuBase.OpenMenu()
+    int result = listMenuBase.GetResultInt()
+    if result == 1 ;search option
+        String searchTerm = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Search for:")
+        Utility.Wait(0.1)
+        Int lengthSearchTerm = StringUtil.GetLength(searchTerm)
+        if (lengthSearchTerm > 0)   
+            Form[] foundItems2 = ProteusDLLUtils.ProteusGetItemBySearch(searchTerm, 43, "")
+            Proteus_SpawnerSearch(ZZProteusSkyUIMenu, target, foundItems2, 0, 1)
+        else
+            Debug.Notification("Invalid length search term.")
+        endIf
+	elseif result == 2 ;explorer option
+		Proteus_ModExplorer(ZZProteusSkyUIMenu, target, 0, 1, 43, 0)
+    elseif result == 3 ;back option
+        allGameForms = NONE
+        PlayerCheats(ZZProteusSkyUIMenu, target)
+    elseif result == 127 ;next page option
+        currentPage += 1
+        Proteus_SpawnerSearch(ZZProteusSkyUIMenu, target, foundItems, startingPoint, currentPage)
+    elseif(result > 0 && result != 127)
+        if(startingPoint > 127)
+            Form selectedForm = allGameForms[startingPointInitial + result - 4] as Form
+			String enteredNumber = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Spawn how many " + selectedForm.GetName() + "?", "1")
+			target.PlaceAtMe(selectedForm, enteredNumber as Int)
+            Proteus_SpawnerSearch(ZZProteusSkyUIMenu, target, foundItems, startingPointInitial, currentPage)
+        Else
+            Form selectedForm = foundItems[result - 4] as Form
+			String enteredNumber = ((ZZProteusSkyUIMenu as Form) as UILIB_1).ShowTextInput("Spawn how many " + selectedForm.GetName() + "?", "1")
+			target.PlaceAtMe(selectedForm, enteredNumber as Int)
+            Proteus_SpawnerSearch(ZZProteusSkyUIMenu, target, foundItems, startingPointInitial, currentPage)
+        endIf
+    endIf
+EndFunction

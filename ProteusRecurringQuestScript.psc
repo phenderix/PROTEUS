@@ -377,6 +377,12 @@ function keyMapCasting()
 			wheelSpell.Cast(player)
 			Utility.Wait(0.1)
 			running = false
+		;cheat menu spell
+		elseif input.IsKeyPressed(k11.getValue() as Int) && running == false
+			running = true
+			PlayerCheats(ZZProteusSkyUIMenu, player)
+			Utility.Wait(0.1)
+			running = false
 		;spawner spell
 		elseif input.IsKeyPressed(k13.getValue() as Int) && running == false
 			running = true
