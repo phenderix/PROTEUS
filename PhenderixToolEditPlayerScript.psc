@@ -155,6 +155,53 @@ ObjectReference property sharedContainer auto
 ObjectReference property sharedContainerVoidLocationMarker auto
 ObjectReference property voidMarker auto
 
+;LeveledItem Properties
+LeveledItem Property ZZProteusOutfitSpawnLI1 Auto
+LeveledItem Property ZZProteusOutfitSpawnLI2 Auto
+LeveledItem Property ZZProteusOutfitSpawnLI3 Auto
+LeveledItem Property ZZProteusOutfitSpawnLI4 Auto
+LeveledItem Property ZZProteusOutfitSpawnLI5 Auto
+LeveledItem Property ZZProteusOutfitSpawnLI6 Auto
+LeveledItem Property ZZProteusOutfitSpawnLI7 Auto
+LeveledItem Property ZZProteusOutfitSpawnLI8 Auto
+LeveledItem Property ZZProteusOutfitSpawnLI9 Auto
+LeveledItem Property ZZProteusOutfitSpawnLI10 Auto
+LeveledItem Property ZZProteusOutfitSpawnLI11 Auto
+LeveledItem Property ZZProteusOutfitSpawnLI12 Auto
+LeveledItem Property ZZProteusOutfitSpawnLI13 Auto
+LeveledItem Property ZZProteusOutfitSpawnLI14 Auto
+LeveledItem Property ZZProteusOutfitSpawnLI15 Auto
+LeveledItem Property ZZProteusOutfitSpawnLI16 Auto
+LeveledItem Property ZZProteusOutfitSpawnLI17 Auto
+LeveledItem Property ZZProteusOutfitSpawnLI18 Auto
+LeveledItem Property ZZProteusOutfitSpawnLI19 Auto
+LeveledItem Property ZZProteusOutfitSpawnLI20 Auto
+LeveledItem Property ZZProteusOutfitSpawnLIEvil Auto
+
+;Outfit properties
+Outfit Property ZZProteusOutfitSpawn1 auto
+Outfit Property ZZProteusOutfitSpawn2 auto
+Outfit Property ZZProteusOutfitSpawn3 auto
+Outfit Property ZZProteusOutfitSpawn4 auto
+Outfit Property ZZProteusOutfitSpawn5 auto
+Outfit Property ZZProteusOutfitSpawn6 auto
+Outfit Property ZZProteusOutfitSpawn7 auto
+Outfit Property ZZProteusOutfitSpawn8 auto
+Outfit Property ZZProteusOutfitSpawn9 auto
+Outfit Property ZZProteusOutfitSpawn10 auto
+Outfit Property ZZProteusOutfitSpawn11 auto
+Outfit Property ZZProteusOutfitSpawn12 auto
+Outfit Property ZZProteusOutfitSpawn13 auto
+Outfit Property ZZProteusOutfitSpawn14 auto
+Outfit Property ZZProteusOutfitSpawn15 auto
+Outfit Property ZZProteusOutfitSpawn16 auto
+Outfit Property ZZProteusOutfitSpawn17 auto
+Outfit Property ZZProteusOutfitSpawn18 auto
+Outfit Property ZZProteusOutfitSpawn19 auto
+Outfit Property ZZProteusOutfitSpawn20 auto
+Outfit Property ZZProteusOutfitSpawnEvil auto
+
+
 
 ;Sound descriptor
 Sound property ZZProteusCompleteSound auto
@@ -1337,7 +1384,7 @@ function Proteus_LoadCharacterSpawn(Actor target, String presetKnownName)
 						Utility.Wait(0.5)	
 						target.SetActorValue("CarryWeight", targetCW)
 						Proteus_LoadCharacterAppearance(presetName, target, currentRace, presetRace, 1) ;load appearance a second time / may fix some glitches
-						Proteus_EquipItems(presetName, Target)
+						;Proteus_EquipItems(presetName, Target)
 					endIf
 				endIf
 			else
@@ -3438,12 +3485,21 @@ Function Proteus_AddEquippedItemsSpawn(String preset, Actor target)
 		Int jItemFormNames = jmap.object()
 		String ItemFormKey = jmap.nextKey(JItemMapList, "", "")
 		String itemName
+		LeveledItem spawnLeveledItem = Proteus_GetSpawnLeveledItem(target)
+		if(spawnLeveledItem == NONE)
+			Debug.Notification("Spawn outfit did not load properly.")
+		endIf
+		spawnLeveledItem.Revert()
 		while ItemFormKey 
 			Form value = jmap.GetForm(JItemMapList, ItemFormKey, none) as Form
+			spawnLeveledItem.AddForm(value, 1, 1)
 			target.AddItem(value)
 			target.EquipItem(value)
 			ItemFormKey = jmap.nextKey(JItemMapList, ItemFormKey, "")
 		endwhile
+		;Debug.MessageBox(spawnLeveledItem.GetNumForms())
+		target.SetOutfit(Proteus_GetSpawnOutfit(target))
+		;target.additem(Gold001, 0)
 	EndIf
 EndFunction
 
@@ -6407,6 +6463,105 @@ function Proteus_LockDisable()
 	Game.EnablePlayerControls()
 	;player.DispelSpell(slowTimeSpell)
 endFunction
+
+
+
+Outfit Function Proteus_GetSpawnOutfit(Actor target)
+	Outfit spawnOutfit
+	if target == ZZCustomF1
+		spawnOutfit = ZZProteusOutfitSpawn1
+	elseif target == ZZCustomF2
+		spawnOutfit = ZZProteusOutfitSpawn2
+	elseif target == ZZCustomF3
+		spawnOutfit = ZZProteusOutfitSpawn3
+	elseif target == ZZCustomF4
+		spawnOutfit = ZZProteusOutfitSpawn4
+	elseif target == ZZCustomF5
+		spawnOutfit = ZZProteusOutfitSpawn5
+	elseif target == ZZCustomF6
+		spawnOutfit = ZZProteusOutfitSpawn6
+	elseif target == ZZCustomF7
+		spawnOutfit = ZZProteusOutfitSpawn7
+	elseif target == ZZCustomF8
+		spawnOutfit = ZZProteusOutfitSpawn8
+	elseif target == ZZCustomF9
+		spawnOutfit = ZZProteusOutfitSpawn9
+	elseif target == ZZCustomF10
+		spawnOutfit = ZZProteusOutfitSpawn10
+	elseif target == ZZCustomM1
+		spawnOutfit = ZZProteusOutfitSpawn11
+	elseif target == ZZCustomM2
+		spawnOutfit = ZZProteusOutfitSpawn12
+	elseif target == ZZCustomM3
+		spawnOutfit = ZZProteusOutfitSpawn13
+	elseif target == ZZCustomM4
+		spawnOutfit = ZZProteusOutfitSpawn14
+	elseif target == ZZCustomM5
+		spawnOutfit = ZZProteusOutfitSpawn15
+	elseif target == ZZCustomM6
+		spawnOutfit = ZZProteusOutfitSpawn16
+	elseif target == ZZCustomM7
+		spawnOutfit = ZZProteusOutfitSpawn17
+	elseif target == ZZCustomM8
+		spawnOutfit = ZZProteusOutfitSpawn18
+	elseif target == ZZCustomM9
+		spawnOutfit = ZZProteusOutfitSpawn19
+	elseif target == ZZCustomM10
+		spawnOutfit = ZZProteusOutfitSpawn20
+	elseif target == hostilePlayerCharacter
+		spawnOutfit = ZZProteusOutfitSpawnEvil
+	endIf
+	return spawnOutfit
+endFunction
+
+LeveledItem Function Proteus_GetSpawnLeveledItem(Actor target)
+    LeveledItem spawnLeveledItem
+    if target == ZZCustomF1
+        spawnLeveledItem = ZZProteusOutfitSpawnLI1
+    elseif target == ZZCustomF2
+        spawnLeveledItem = ZZProteusOutfitSpawnLI2
+    elseif target == ZZCustomF3
+        spawnLeveledItem = ZZProteusOutfitSpawnLI3
+    elseif target == ZZCustomF4
+        spawnLeveledItem = ZZProteusOutfitSpawnLI4
+    elseif target == ZZCustomF5
+        spawnLeveledItem = ZZProteusOutfitSpawnLI5
+    elseif target == ZZCustomF6
+        spawnLeveledItem = ZZProteusOutfitSpawnLI6
+    elseif target == ZZCustomF7
+        spawnLeveledItem = ZZProteusOutfitSpawnLI7
+    elseif target == ZZCustomF8
+        spawnLeveledItem = ZZProteusOutfitSpawnLI8
+    elseif target == ZZCustomF9
+        spawnLeveledItem = ZZProteusOutfitSpawnLI9
+    elseif target == ZZCustomF10
+        spawnLeveledItem = ZZProteusOutfitSpawnLI10
+    elseif target == ZZCustomM1
+        spawnLeveledItem = ZZProteusOutfitSpawnLI11
+    elseif target == ZZCustomM2
+        spawnLeveledItem = ZZProteusOutfitSpawnLI12
+    elseif target == ZZCustomM3
+        spawnLeveledItem = ZZProteusOutfitSpawnLI13
+    elseif target == ZZCustomM4
+        spawnLeveledItem = ZZProteusOutfitSpawnLI14
+    elseif target == ZZCustomM5
+        spawnLeveledItem = ZZProteusOutfitSpawnLI15
+    elseif target == ZZCustomM6
+        spawnLeveledItem = ZZProteusOutfitSpawnLI16
+    elseif target == ZZCustomM7
+        spawnLeveledItem = ZZProteusOutfitSpawnLI17
+    elseif target == ZZCustomM8
+        spawnLeveledItem = ZZProteusOutfitSpawnLI18
+    elseif target == ZZCustomM9
+        spawnLeveledItem = ZZProteusOutfitSpawnLI19
+    elseif target == ZZCustomM10
+        spawnLeveledItem = ZZProteusOutfitSpawnLI20
+    elseif target == hostilePlayerCharacter
+        spawnLeveledItem = ZZProteusOutfitSpawnLIEvil
+    endIf
+    return spawnLeveledItem
+endFunction
+
 
 
 
