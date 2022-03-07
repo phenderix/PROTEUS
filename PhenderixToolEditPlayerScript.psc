@@ -151,8 +151,7 @@ ObjectReference property UnequippedContainer47 auto
 ObjectReference property UnequippedContainer48 auto
 ObjectReference property UnequippedContainer49 auto
 ObjectReference property UnequippedContainer50 auto
-ObjectReference property sharedContainer auto
-ObjectReference property sharedContainerVoidLocationMarker auto
+ReferenceAlias property sharedContainer auto
 ObjectReference property voidMarker auto
 
 ;LeveledItem Properties
@@ -1384,6 +1383,9 @@ function Proteus_LoadCharacterSpawn(Actor target, String presetKnownName)
 						Utility.Wait(0.5)	
 						target.SetActorValue("CarryWeight", targetCW)
 						Proteus_LoadCharacterAppearance(presetName, target, currentRace, presetRace, 1) ;load appearance a second time / may fix some glitches
+						target.MoveTo(voidMarker)
+						Utility.Wait(0.1)
+						target.MoveTo(player)
 						;Proteus_EquipItems(presetName, Target)
 					endIf
 				endIf
@@ -3329,7 +3331,7 @@ Function Proteus_SaveAllItems(String preset, Actor target, Bool saveUnequipped)
 		Form[] unequippedItems = Utility.CreateFormArray(2000)
 		Int[] unequippedItemsCount = Utility.CreateIntArray(2000)
 
-		;PO3 SKSE scripts that will filter inventory to get unequipped items, equipped items, and favorited items
+		;SKSE scripts that will filter inventory to get unequipped items, equipped items, and favorited items
 		unequippedItems = ProteusAddAllItemsToArray(target, true, false, true)
 
 		;get count unequipped items and record favorited unequipped items
@@ -3391,7 +3393,6 @@ Function Proteus_SaveAllItems(String preset, Actor target, Bool saveUnequipped)
 		rightHandWeapon = target.GetEquippedWeapon(false)
         equippedItems[i] = rightHandWeapon
         equippedItemsCount[i] = target.GetItemCount(rightHandWeapon)
-        i+=1
 	endIf
 
 	bool leftSelected = false
@@ -3399,17 +3400,14 @@ Function Proteus_SaveAllItems(String preset, Actor target, Bool saveUnequipped)
     Int jItemFormListEq
     Int jItemFormNamesEq = jmap.object()
     String ItemFormKeyEq = jmap.nextKey(jItemFormListEq, "", "")
-    Form value
     Int itemType
     int j = 0
 
 	Form[] equippedTemp = new Form[100]
 	Int equippedTempCount = 0
 
-    while j < equippedItems.Length && equippedItems[j]
-        itemType = equippedItems[j].GetType() ;see if clothing, armor, or weapon
-        value = jmap.GetForm(jItemFormListEq,ItemFormKeyEq, none)
-		if(itemType == 41 && continue == true) ;is this a weapon? 41 is weapon type
+    while j < i && equippedItems[j] != NONE
+		if(continue == true && equippedItems[j].GetType() == 41) ;is this a weapon? 41 is weapon type
 			if(left == true && right == true) ;a weapon is equipped in both hands or one weapon is equipped by both hands
 				if(leftHandWeapon == equippedItems[j] && rightHandWeapon == equippedItems[j] && (equippedItems[j] as Weapon).GetEquipType() == BothHands) ;is two handed weapon equipped?
 					equippedTemp[equippedTempCount] = equippedItems[j]
@@ -3553,7 +3551,7 @@ EndFunction
 
 Function Proteus_LoadItems(String presetName, Actor target)
 	ObjectReference storageContainerUnequipped = Proteus_LoadUnequippedContainerFunction(presetName)
-	if(storageContainerUnequipped.GetDisplayname() == presetName)
+	if(storageContainerUnequipped != NONE && storageContainerUnequipped.GetDisplayname() == presetName)
 		storageContainerUnequipped.RemoveAllItems(target, true, true)
 	else
 		int counter = 1
@@ -6354,13 +6352,8 @@ endFunction
 
 
 Function Proteus_OpenSharedStash()
-	sharedContainer.MoveTo(player, 0, 0, -10000)
-	Utility.Wait(0.1)
-	while(player.GetParentCell() != sharedContainer.GetParentCell())
-	endWhile
-	Utility.Wait(0.1)
-	sharedContainer.Activate(player)
-	Utility.Wait(0.1)
+	ObjectReference sharedContainerRef = sharedContainer.GetReference()
+	sharedContainerRef.Activate(player)
 endFunction
 
 
